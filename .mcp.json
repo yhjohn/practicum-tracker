@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "laravelBoost": {
+            "type": "stdio",
+            "command": "ddev",
+            "args": ["artisan", "boost:mcp"]
+        }
+    }
+}

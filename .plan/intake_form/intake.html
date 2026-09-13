@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Adult Counselling Intake Form</title>
+<style>
+body{font:16px/1.45 Arial,sans-serif;color:#20242a;margin:0;padding:24px}main{max-width:900px;margin:auto}header{text-align:center}h1{font-size:1.6rem}.section{border:1px solid #cbd1d8;border-radius:9px;padding:16px;margin:16px 0;break-inside:avoid}h2{font-size:1.1rem;color:#1f4e78;margin:0 0 12px}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.field{margin-bottom:12px;min-width:0}label{display:block;font-weight:600;margin-bottom:5px}input:not([type=checkbox]):not([type=radio]),textarea{box-sizing:border-box;width:100%;padding:9px;border:1px solid #aeb6bf;border-radius:5px;font:inherit}textarea{min-height:75px}.checks{display:flex;flex-wrap:wrap;gap:8px 16px}.checks label{font-weight:400;display:flex;gap:6px;align-items:center}.actions{display:flex;gap:10px;margin:20px 0}button{padding:10px 18px;border:1px solid #1f4e78;border-radius:22px;font:inherit;cursor:pointer}.primary{background:#1f4e78;color:white}.hint{font-size:.85rem;color:#5d6670}@media(max-width:480px){body{padding:12px}.section{padding:12px}}@media print{body{padding:0;font-size:11pt}.actions,.hint{display:none}.section{border-radius:0;padding:10px}input,textarea{background:white!important}}
+
+  .signature-wrap { width:100%; height:300px; border:1.5px solid #8d9aaa; border-radius:7px; background:#fff; overflow:hidden; touch-action:none; }
+  #client-signature-canvas { display:block; width:100%; height:100%; cursor:crosshair; touch-action:none; }
+  .signature-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .signature-actions button { background:#fff; color:#1f4e78; }
+  @media(min-width:700px) { .signature-wrap { height:360px; } }
+  @media print { .signature-wrap { height:220px; } .signature-actions { display:none; } }
+
+</style></head><body><main>
+<header><h1>Adult Counselling Intake Form</h1><p>Please complete the sections you feel comfortable answering. You may leave a response blank or discuss it with your counsellor.</p></header>
+<form id="intake">
+<section class="section"><h2>Personal Information</h2><div class="fields">
+<div class="field"><label>Full name</label><input name="name" autocomplete="name"></div><div class="field"><label>Date of birth</label><input type="date" name="dob"></div><div class="field"><label>Age</label><input type="number" name="age" min="0" max="120"></div><div class="field"><label>Phone number</label><input type="tel" name="phone"></div><div class="field"><label>Email</label><input type="email" name="email"></div><div class="field"><label>Occupation</label><input name="occupation"></div></div>
+<p><strong>Sex (optional)</strong></p><div class="checks"><label><input type="radio" name="sex" value="Male">Male</label><label><input type="radio" name="sex" value="Female">Female</label><label><input type="radio" name="sex" value="Non-binary">Non-binary</label><label><input type="radio" name="sex" value="Prefer not to say">Prefer not to say</label></div>
+<h3>Emergency Contact</h3><div class="fields"><div class="field"><label>Contact's full name</label><input name="emergency_name"></div><div class="field"><label>Relationship to you</label><input name="emergency_relationship"></div><div class="field"><label>Phone number</label><input type="tel" name="emergency_phone"></div></div><p class="hint">Your counsellor can explain when this person may be contacted.</p></section>
+<section class="section"><h2>Marital / Relationship Status</h2><div class="checks"><label><input type="checkbox" name="marital" value="Single">Single</label><label><input type="checkbox" name="marital" value="Married">Married</label><label><input type="checkbox" name="marital" value="Divorced">Divorced</label><label><input type="checkbox" name="marital" value="Separated">Separated</label><label><input type="checkbox" name="marital" value="Widowed">Widowed</label><label><input type="checkbox" name="marital" value="In a relationship">In a relationship</label></div><div class="field"><label>Length of current relationship (if applicable)</label><input name="relationship_length"></div><div class="field"><label>Number of previous marriages (if applicable)</label><input type="number" name="marriages" min="0"></div></section>
+<section class="section"><h2>Education</h2><div class="field"><label>Years of education completed / highest level</label><input name="education"></div><div class="checks"><label><input type="checkbox" name="education_current" value="College/university">College/university</label><label><input type="checkbox" name="education_current" value="Vocational training">Vocational training</label><label><input type="checkbox" name="education_current" value="Graduate school">Graduate school</label><label><input type="checkbox" name="education_current" value="Other training">Other training</label></div><div class="field"><label>Relevant details or circumstances</label><textarea name="education_details"></textarea></div></section>
+<section class="section"><h2>Career / Employment</h2><div class="field"><label>Current employment / job title</label><input name="job_title"></div><div class="field"><label>Employment history and relevant circumstances</label><textarea name="employment_history"></textarea></div><div class="field"><label>Job satisfaction (1–5) and why</label><textarea name="job_satisfaction"></textarea></div></section>
+<section class="section"><h2>Personal Strengths and Supports</h2><div class="field"><label>What activities do you enjoy or feel successful doing?</label><textarea name="strength_activities"></textarea></div><div class="field"><label>What personal qualities or strengths do you see in yourself?</label><textarea name="strengths"></textarea></div><div class="field"><label>What strengths might others say you have?</label><textarea name="others_strengths"></textarea></div><div class="field"><label>Who or what supports you (people, activities, beliefs, etc.)?</label><textarea name="supports"></textarea></div></section>
+<section class="section"><h2>Traumatic Experiences or Significant Losses</h2><p>Tick any that apply. Share only what you feel comfortable sharing.</p><div class="checks"><label><input type="checkbox" name="trauma" value="Bullying">Bullying</label><label><input type="checkbox" name="trauma" value="Chronic illness">Chronic illness</label><label><input type="checkbox" name="trauma" value="Death/loss">Death/loss</label><label><input type="checkbox" name="trauma" value="Divorce/separation">Divorce/separation</label><label><input type="checkbox" name="trauma" value="Emotional abuse">Emotional abuse</label><label><input type="checkbox" name="trauma" value="Financial hardship">Financial hardship</label><label><input type="checkbox" name="trauma" value="Physical/medical trauma">Physical/medical trauma</label><label><input type="checkbox" name="trauma" value="Sexual abuse">Sexual abuse</label><label><input type="checkbox" name="trauma" value="Stalking">Stalking</label><label><input type="checkbox" name="trauma" value="Other">Other</label></div><div class="field"><label>Anything you would like to add</label><textarea name="trauma_details"></textarea></div></section>
+<section class="section"><h2>Family History</h2><div class="field"><label>How would you describe your family?</label><textarea name="family_description"></textarea></div><div class="field"><label>Are there childhood or family experiences important for your counsellor to know?</label><textarea name="childhood_experience"></textarea></div><div class="field"><label>Did you receive the support you needed from family or friends?</label><textarea name="family_support"></textarea></div></section>
+<section class="section"><h2>Counselling / Medical History</h2><div class="field"><label>Have you previously seen a counsellor or therapist? Where, when, and why?</label><textarea name="counselling_history"></textarea></div><div class="field"><label>Any previous mental health diagnosis you wish to share?</label><textarea name="diagnosis"></textarea></div><div class="field"><label>What was helpful or unhelpful in previous support?</label><textarea name="therapy_experience"></textarea></div><div class="field"><label>Psychiatric services, hospitalisation, or medication relevant to your wellbeing (if comfortable)</label><textarea name="medical_history"></textarea></div></section>
+<section class="section"><h2>Substance Use</h2><div class="field"><label>Do you currently use alcohol, tobacco, or other substances? If yes, describe type, frequency, and amount if comfortable.</label><textarea name="substance_use"></textarea></div><div class="field"><label>Have you received support or treatment related to substance use?</label><textarea name="substance_treatment"></textarea></div></section>
+<section class="section"><h2>Legal Issues</h2><div class="field"><label>Are there current or past legal issues affecting you or your family?</label><textarea name="legal_issues"></textarea></div><div class="field"><label>How have these issues affected you or your loved ones?</label><textarea name="legal_impact"></textarea></div></section>
+<section class="section"><h2>Emotional / Mental Wellbeing</h2><div class="field"><label>How would you describe your emotions and mood recently?</label><textarea name="emotions"></textarea></div><div class="field"><label>Have you had thoughts about harming yourself or someone else? Share only what you feel comfortable sharing; your counsellor may discuss safety with you.</label><textarea name="safety"></textarea></div><div class="field"><label>Who could you turn to for support?</label><textarea name="support_system"></textarea></div><div class="field"><label>What significant problems or stresses are you facing now?</label><textarea name="current_stress"></textarea></div><div class="field"><label>Any memory or concentration concerns?</label><textarea name="memory"></textarea></div></section>
+<section class="section"><h2>Spirituality / Beliefs</h2><div class="field"><label>Is there a belief system or spiritual practice your counsellor should be aware of?</label><textarea name="belief_system"></textarea></div><div class="field"><label>Did religion or spiritual practice play a part in your upbringing?</label><textarea name="spiritual_upbringing"></textarea></div></section>
+<section class="section"><h2>Reasons for Seeking Counselling</h2><div class="field"><label>Briefly describe the concern for which you are seeking counselling.</label><textarea name="seeking_reason"></textarea></div><div class="field"><label>When did you first notice this concern?</label><textarea name="first_occurred"></textarea></div><div class="field"><label>What is most concerning for you right now?</label><textarea name="main_concern"></textarea></div><div class="field"><label>What concerns have family or friends expressed, if any?</label><textarea name="family_concern"></textarea></div><div class="field"><label>What would you like to achieve through counselling?</label><textarea name="counselling_outcome"></textarea></div><div class="field"><label>Anything else you would like to share?</label><textarea name="anything_else"></textarea></div></section>
+<section class="section">
+<h2>Confidentiality Acknowledgement and Signature</h2>
+<p>My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.</p>
+
+<div class="field">
+  <label for="client-signature-canvas">Client signature</label>
+  <p class="hint">Sign in the box below using your mouse, touchpad, or touchscreen.</p>
+  <div class="signature-wrap">
+    <canvas id="client-signature-canvas" aria-label="Signature drawing area"></canvas>
+  </div>
+  <div class="signature-actions">
+    <button type="button" id="clear-signature">Clear signature</button>
+    <button type="button" id="undo-signature">Undo</button>
+    <button type="button" id="redo-signature">Redo</button>
+  </div>
+</div>
+
+<div class="field">
+  <label for="signature-date">Date</label>
+  <input id="signature-date" name="signature-date" type="date">
+</div>
+<p class="hint">By signing above, I acknowledge that I have read and understood the information regarding the purpose of this intake form and the confidentiality of information shared, including its limits.</p>
+</section>
+<div class="actions"><button class="primary" type="button" onclick="window.print()">Print / Save as PDF</button><button type="reset">Clear form</button></div>
+</form></main>
+<script>
+(function () {
+  const canvas = document.getElementById('client-signature-canvas');
+  if (!canvas || canvas.dataset.ready === 'true') return;
+  canvas.dataset.ready = 'true';
+  const ctx = canvas.getContext('2d');
+  let drawing = false, current = null, history = [], redoStack = [];
+  const ink = '#172b45';
+
+  function setupCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.max(1, window.devicePixelRatio || 1);
+    const saved = canvas.width && canvas.height ? canvas.toDataURL() : null;
+    canvas.width = Math.round(rect.width * ratio);
+    canvas.height = Math.round(rect.height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = ink;
+    if (saved) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      img.src = saved;
+    }
+  }
+  function point(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  function snapshot() {
+    history.push(canvas.toDataURL());
+    if (history.length > 40) history.shift();
+    redoStack = [];
+  }
+  function restore(data) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!data) return;
+    const img = new Image();
+    img.onload = () => {
+      const r = canvas.getBoundingClientRect();
+      ctx.drawImage(img, 0, 0, r.width, r.height);
+    };
+    img.src = data;
+  }
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    drawing = true;
+    current = point(e);
+    canvas.setPointerCapture(e.pointerId);
+    ctx.beginPath();
+    ctx.moveTo(current.x, current.y);
+    ctx.lineTo(current.x + 0.1, current.y + 0.1);
+    ctx.stroke();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    e.preventDefault();
+    const next = point(e);
+    ctx.beginPath();
+    ctx.moveTo(current.x, current.y);
+    ctx.lineTo(next.x, next.y);
+    ctx.stroke();
+    current = next;
+  });
+  function endStroke() {
+    if (!drawing) return;
+    drawing = false;
+    current = null;
+    snapshot();
+  }
+  canvas.addEventListener('pointerup', endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+  document.getElementById('clear-signature').addEventListener('click', () => {
+    if (canvas.toDataURL()) redoStack = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    history.push('');
+    if (history.length > 40) history.shift();
+  });
+  document.getElementById('undo-signature').addEventListener('click', () => {
+    if (!history.length) return;
+    redoStack.push(canvas.toDataURL());
+    restore(history.pop());
+  });
+  document.getElementById('redo-signature').addEventListener('click', () => {
+    if (!redoStack.length) return;
+    history.push(canvas.toDataURL());
+    restore(redoStack.pop());
+  });
+  window.addEventListener('resize', setupCanvas);
+  setupCanvas();
+})();
+</script>
+
+</body></html>
