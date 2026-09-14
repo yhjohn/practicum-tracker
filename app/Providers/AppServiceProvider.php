@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +27,7 @@ class AppServiceProvider extends ServiceProvider
             'client' => Client::class,
             'group' => Group::class,
         ]);
+
+        URL::forceScheme('https');
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Filament\Schemas\Intakes;
 
+use App\Livewire\PublicIntakeForm;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard\Step;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
@@ -15,12 +17,27 @@ class IntakeWizard
     /**
      * @return array<Step>
      */
-    public static function steps(): array
+    public static function steps(PublicIntakeForm $livewire): array
+    {
+        $steps = array_map(
+            fn (Step $step): Step => $step->afterValidation(fn () => $livewire->saveProgress()),
+            static::baseSteps(),
+        );
+
+        $steps[] = static::summaryStep();
+
+        return $steps;
+    }
+
+    /**
+     * @return array<Step>
+     */
+    protected static function baseSteps(): array
     {
         return [
             Step::make('Personal Information')
                 ->schema([
-                    TextInput::make('name'),
+                    TextInput::make('name')->label('Full name'),
                     DatePicker::make('dob')->label('Date of birth'),
                     TextInput::make('age')->numeric()->minValue(0)->maxValue(120),
                     TextInput::make('phone')->tel(),
@@ -43,7 +60,6 @@ class IntakeWizard
             Step::make('Marital / Relationship Status')
                 ->schema([
                     Radio::make('marital')
-                        ->hiddenLabel()
                         ->options([
                             'Single' => 'Single',
                             'Married' => 'Married',
@@ -58,8 +74,8 @@ class IntakeWizard
 
             Step::make('Education')
                 ->schema([
-                    TextInput::make('education')->label('Years of education completed / highest level'),
-                    CheckboxList::make('education_current')
+                    TextInput::make('education')->label('Highest level of education completed'),
+                    Radio::make('education_current')
                         ->label('Currently enrolled in')
                         ->options([
                             'College/university' => 'College/university',
@@ -88,7 +104,6 @@ class IntakeWizard
             Step::make('Traumatic Experiences or Significant Losses')
                 ->schema([
                     CheckboxList::make('trauma')
-                        ->hiddenLabel()
                         ->helperText('Tick any that apply. Share only what you feel comfortable sharing.')
                         ->options([
                             'Bullying' => 'Bullying',
@@ -156,14 +171,23 @@ class IntakeWizard
                     Textarea::make('counselling_outcome')->label('What would you like to achieve through counselling?'),
                     Textarea::make('anything_else')->label('Anything else you would like to share?'),
                 ]),
-
-            Step::make('Confidentiality Acknowledgement and Signature')
-                ->schema([
-                    SignaturePad::make('signature')
-                        ->label('Client signature')
-                        ->required(),
-                    DatePicker::make('signature_date')->label('Date')->default(now()),
-                ]),
         ];
+    }
+
+    protected static function summaryStep(): Step
+    {
+        return Step::make('Review & Sign')
+            ->schema([
+                ...IntakeSummary::sections(),
+
+                Section::make('Confidentiality Acknowledgement and Signature')
+                    ->description('My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.')
+                    ->schema([
+                        SignaturePad::make('signature')
+                            ->label('Client signature')
+                            ->required(),
+                        DatePicker::make('signature_date')->label('Date')->default(now()),
+                    ]),
+            ]);
     }
 }

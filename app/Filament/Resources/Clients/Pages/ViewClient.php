@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Clients\Pages;
 use App\Enums\IntakeStatus;
 use App\Filament\Resources\Clients\ClientResource;
 use App\Models\Client;
+use App\Models\Intake;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use ToneGabes\Filament\Icons\Enums\Phosphor;
 
@@ -23,15 +25,25 @@ class ViewClient extends ViewRecord
                 ->label('Generate intake link')
                 ->icon(Phosphor::Link)
                 ->modalHeading('Intake link')
-                ->modalDescription('Share this link with the client. It expires in 7 days.')
+                ->modalDescription('Share the link and the access code with the client through separate channels (e.g. email the link, tell them the code by phone). The link is valid for 30 days; the code unlocks the form.')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Close')
-                ->fillForm(fn (Client $record): array => [
-                    'url' => $this->intakeUrlFor($record),
-                ])
+                ->fillForm(function (Client $record): array {
+                    $intake = $this->pendingIntakeFor($record);
+                    $code = $this->regenerateAccessCode($intake);
+
+                    return [
+                        'url' => URL::temporarySignedRoute('intake.show', now()->addDays(30), ['intake' => $intake->id]),
+                        'code' => $code,
+                    ];
+                })
                 ->schema([
                     TextInput::make('url')
-                        ->hiddenLabel()
+                        ->label('Intake link')
+                        ->readOnly()
+                        ->copyable(),
+                    TextInput::make('code')
+                        ->label('Access code')
                         ->readOnly()
                         ->copyable(),
                 ]),
@@ -39,9 +51,9 @@ class ViewClient extends ViewRecord
         ];
     }
 
-    private function intakeUrlFor(Client $client): string
+    private function pendingIntakeFor(Client $client): Intake
     {
-        $intake = $client->intakes()
+        return $client->intakes()
             ->where('status', IntakeStatus::Pending)
             ->latest()
             ->first()
@@ -54,7 +66,14 @@ class ViewClient extends ViewRecord
                 'emergency_name' => $client->emergency_contact,
                 'emergency_phone' => $client->emergency_contact_phone,
             ]);
+    }
 
-        return URL::temporarySignedRoute('intake.show', now()->addDays(7), ['intake' => $intake->id]);
+    private function regenerateAccessCode(Intake $intake): string
+    {
+        $code = (string) random_int(100000, 999999);
+
+        $intake->update(['access_code' => Hash::make($code)]);
+
+        return $code;
     }
 }

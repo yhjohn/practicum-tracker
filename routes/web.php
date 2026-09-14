@@ -4,7 +4,7 @@ use App\Livewire\PublicIntakeForm;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 Route::get('/intake/{intake}', PublicIntakeForm::class)

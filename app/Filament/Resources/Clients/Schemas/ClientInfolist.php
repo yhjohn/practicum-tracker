@@ -2,7 +2,12 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use App\Filament\Schemas\Intakes\IntakeSummary;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ClientInfolist
@@ -30,6 +35,46 @@ class ClientInfolist
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),
+
+                Section::make('Intake forms')
+                    ->columnSpanFull()
+                    ->schema([
+                        RepeatableEntry::make('intakes')
+                            ->hiddenLabel()
+                            ->schema([
+                                Grid::make(3)
+                                    ->schema([
+                                        TextEntry::make('status')
+                                            ->badge(),
+                                        TextEntry::make('submitted_at')
+                                            ->dateTime()
+                                            ->placeholder('Not yet submitted'),
+                                        TextEntry::make('created_at')
+                                            ->label('Link generated')
+                                            ->dateTime(),
+                                    ]),
+
+                                ...collect(IntakeSummary::sections())
+                                    
+                                    ->all(),
+
+                                Section::make('Confidentiality Acknowledgement and Signature')
+                                    ->schema([
+                                        ImageEntry::make('signature')
+                                            ->label('Signature')
+                                            ->hiddenLabel()
+                                            ->height('8rem')
+                                            ->placeholder('Not yet signed'),
+                                        TextEntry::make('signature_date')
+                                            ->label('Date signed')
+                                            ->date()
+                                            ->placeholder('-'),
+                                    ])
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                    ])
+                    ->collapsible(),
             ]);
     }
 }

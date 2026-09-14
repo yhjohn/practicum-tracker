@@ -6,6 +6,7 @@ use App\Enums\IntakeStatus;
 use App\Models\Client;
 use App\Models\Intake;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends Factory<Intake>
@@ -30,6 +31,13 @@ class IntakeFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => IntakeStatus::Submitted,
             'submitted_at' => now(),
+        ]);
+    }
+
+    public function withAccessCode(string $code): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'access_code' => Hash::make($code),
         ]);
     }
 }

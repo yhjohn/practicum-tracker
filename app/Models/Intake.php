@@ -15,6 +15,10 @@ class Intake extends Model
 
     protected $guarded = [];
 
+    protected $hidden = [
+        'access_code',
+    ];
+
     protected $casts = [
         'dob' => 'date',
         'signature_date' => 'date',
