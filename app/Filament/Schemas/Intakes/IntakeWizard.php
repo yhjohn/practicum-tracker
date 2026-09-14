@@ -184,6 +184,10 @@ class IntakeWizard
                     ->description('My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.')
                     ->schema([
                         SignaturePad::make('signature')
+                            ->backgroundColor('#ffffff')
+                            ->backgroundColorOnDark('#ffffff')
+                            ->penColor('#000')
+                            ->penColorOnDark('#000')
                             ->label('Client signature')
                             ->required(),
                         DatePicker::make('signature_date')->label('Date')->default(now()),

@@ -55,7 +55,7 @@ class ClientInfolist
                                     ]),
 
                                 ...collect(IntakeSummary::sections())
-                                    
+
                                     ->all(),
 
                                 Section::make('Confidentiality Acknowledgement and Signature')
@@ -75,6 +75,31 @@ class ClientInfolist
                             ]),
                     ])
                     ->collapsible(),
+
+                Section::make('Informed Consent')
+                    ->columnSpanFull()
+                    ->collapsible()
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('consent.status')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->placeholder('Not yet generated'),
+                                TextEntry::make('consent.full_name')
+                                    ->label('Full name')
+                                    ->placeholder('-'),
+                                TextEntry::make('consent.submitted_at')
+                                    ->label('Signed at')
+                                    ->dateTime()
+                                    ->placeholder('Not yet submitted'),
+                            ]),
+                        ImageEntry::make('consent.signature')
+                            ->label('Signature')
+                            ->hiddenLabel()
+                            ->height('8rem')
+                            ->placeholder('Not yet signed'),
+                    ]),
             ]);
     }
 }

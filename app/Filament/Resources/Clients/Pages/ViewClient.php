@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Clients\Pages;
 use App\Enums\IntakeStatus;
 use App\Filament\Resources\Clients\ClientResource;
 use App\Models\Client;
+use App\Models\Consent;
 use App\Models\Intake;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -47,6 +48,22 @@ class ViewClient extends ViewRecord
                         ->readOnly()
                         ->copyable(),
                 ]),
+            Action::make('generateConsentLink')
+                ->label('Generate consent link')
+                ->icon(Phosphor::Link)
+                ->modalHeading('Consent link')
+                ->modalDescription('Share the link with the client. The link is valid for 30 days.')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close')
+                ->fillForm(fn (Client $record): array => [
+                    'url' => URL::temporarySignedRoute('consent.show', now()->addDays(30), ['consent' => $this->pendingConsentFor($record)->id]),
+                ])
+                ->schema([
+                    TextInput::make('url')
+                        ->label('Consent link')
+                        ->readOnly()
+                        ->copyable(),
+                ]),
             EditAction::make(),
         ];
     }
@@ -66,6 +83,13 @@ class ViewClient extends ViewRecord
                 'emergency_name' => $client->emergency_contact,
                 'emergency_phone' => $client->emergency_contact_phone,
             ]);
+    }
+
+    private function pendingConsentFor(Client $client): Consent
+    {
+        return $client->consent ?? $client->consent()->create([
+            'full_name' => $client->name,
+        ]);
     }
 
     private function regenerateAccessCode(Intake $intake): string
