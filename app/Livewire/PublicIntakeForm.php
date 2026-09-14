@@ -87,6 +87,7 @@ class PublicIntakeForm extends Component implements HasActions, HasSchemas
         return $schema
             ->components([
                 Wizard::make(IntakeWizard::steps($this))
+                    ->skippable()
                     ->submitAction(new HtmlString(
                         '<button type="submit" class="fi-btn fi-btn-size-md fi-color-primary fi-btn-color-primary rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">Submit</button>'
                     )),
