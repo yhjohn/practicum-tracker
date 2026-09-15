@@ -47,10 +47,14 @@ class PublicIntakeForm extends Component implements HasActions, HasSchemas
             return;
         }
 
-        if ($this->isVerified()) {
-            $this->step = 'form';
-            $this->form->fill($this->intakeAttributes());
+        if (! $this->isVerified()) {
+            $this->step = 'code';
+
+            return;
         }
+
+        $this->step = 'form';
+        $this->form->fill($this->intakeAttributes());
     }
 
     public function verifyAccessCode(): void
@@ -156,7 +160,7 @@ class PublicIntakeForm extends Component implements HasActions, HasSchemas
 
     private function sessionKey(): string
     {
-        return "intakes.{$this->intake->id}.verified_until";
+        return "client_portal.{$this->intake->client_id}";
     }
 
     private function isVerified(): bool

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class Client extends Model
 {
@@ -19,7 +21,25 @@ class Client extends Model
 
     protected $casts = [
         'dob' => 'date',
+        'public_access_expires_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Client $client): void {
+            if (empty($client->public_access_token)) {
+                $client->public_access_token = (string) Str::uuid();
+            }
+
+            if (empty($client->public_access_code)) {
+                $client->public_access_code = Hash::make((string) random_int(100000, 999999));
+            }
+
+            if (empty($client->public_access_expires_at)) {
+                $client->public_access_expires_at = now()->addDays(30);
+            }
+        });
+    }
 
     public function groups(): BelongsToMany
     {

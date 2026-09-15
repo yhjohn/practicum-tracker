@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use ToneGabes\Filament\Icons\Enums\Phosphor;
 
 class ViewClient extends ViewRecord
@@ -25,45 +26,30 @@ class ViewClient extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('generateIntakeLink')
-                ->label('Generate intake link')
+            Action::make('generateClientPortalLink')
+                ->label('Generate client portal link')
                 ->icon(Phosphor::Link)
-                ->modalHeading('Intake link')
-                ->modalDescription('Share the link and the access code with the client through separate channels (e.g. email the link, tell them the code by phone). The link is valid for 30 days; the code unlocks the form.')
+                ->modalHeading('Client portal')
+                ->modalDescription('Share the portal link and passcode with the client. The portal and its links remain valid for 30 days.')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Close')
                 ->fillForm(function (Client $record): array {
-                    $intake = $this->pendingIntakeFor($record);
-                    $code = $this->regenerateAccessCode($intake);
+                    $record->public_access_token = $record->public_access_token ?: (string) Str::uuid();
+                    $record->public_access_expires_at = $record->public_access_expires_at ?: now()->addDays(30);
+                    $code = $this->regeneratePortalAccessCode($record);
 
                     return [
-                        'url' => URL::temporarySignedRoute('intake.show', now()->addDays(30), ['intake' => $intake->id]),
+                        'url' => URL::temporarySignedRoute('client.portal', $record->public_access_expires_at, ['token' => $record->public_access_token]),
                         'code' => $code,
                     ];
                 })
                 ->schema([
                     TextInput::make('url')
-                        ->label('Intake link')
+                        ->label('Portal link')
                         ->readOnly()
                         ->copyable(),
                     TextInput::make('code')
-                        ->label('Access code')
-                        ->readOnly()
-                        ->copyable(),
-                ]),
-            Action::make('generateConsentLink')
-                ->label('Generate consent link')
-                ->icon(Phosphor::Link)
-                ->modalHeading('Consent link')
-                ->modalDescription('Share the link with the client. The link is valid for 30 days.')
-                ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Close')
-                ->fillForm(fn (Client $record): array => [
-                    'url' => URL::temporarySignedRoute('consent.show', now()->addDays(30), ['consent' => $this->pendingConsentFor($record)->id]),
-                ])
-                ->schema([
-                    TextInput::make('url')
-                        ->label('Consent link')
+                        ->label('Passcode')
                         ->readOnly()
                         ->copyable(),
                 ]),
@@ -135,6 +121,17 @@ class ViewClient extends ViewRecord
         $code = (string) random_int(100000, 999999);
 
         $intake->update(['access_code' => Hash::make($code)]);
+
+        return $code;
+    }
+
+    private function regeneratePortalAccessCode(Client $client): string
+    {
+        $code = (string) random_int(100000, 999999);
+
+        $client->public_access_code = Hash::make($code);
+        $client->public_access_expires_at = now()->addDays(30);
+        $client->save();
 
         return $code;
     }

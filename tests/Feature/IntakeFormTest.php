@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Enums\IntakeStatus;
 use App\Filament\Resources\Clients\Pages\ViewClient;
+use App\Livewire\PublicClientPortal;
+use App\Livewire\PublicConsentForm;
 use App\Livewire\PublicIntakeForm;
 use App\Models\Client;
 use App\Models\Intake;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -18,28 +21,71 @@ class IntakeFormTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_generate_intake_link_action_creates_a_pending_intake_with_an_access_code(): void
+    public function test_generate_client_portal_link_action_creates_a_portal_token_and_passcode(): void
     {
         $this->actingAs(User::factory()->create());
         $client = Client::factory()->create();
 
         Livewire::test(ViewClient::class, ['record' => $client->getRouteKey()])
-            ->callAction('generateIntakeLink')
+            ->callAction('generateClientPortalLink')
             ->assertHasNoActionErrors();
 
-        $intake = $client->intakes()->sole();
+        $client->refresh();
 
-        $this->assertSame(IntakeStatus::Pending, $intake->status);
-        $this->assertNotNull($intake->access_code);
+        $this->assertNotNull($client->public_access_token);
+        $this->assertNotNull($client->public_access_code);
+        $this->assertNotNull($client->public_access_expires_at);
     }
 
-    public function test_public_intake_form_requires_an_access_code_before_showing_the_wizard(): void
+    public function test_client_portal_requires_valid_passcode_before_showing_form_links(): void
     {
-        $intake = Intake::factory()->create();
+        $client = Client::factory()->create([
+            'public_access_token' => 'test-token-123',
+            'public_access_code' => Hash::make('123456'),
+            'public_access_expires_at' => now()->addDays(7),
+        ]);
+
+        $url = URL::temporarySignedRoute('client.portal', now()->addDays(7), ['token' => $client->public_access_token]);
+
+        $this->get($url)->assertOk()->assertSee('Enter your access code');
+
+        Livewire::test(PublicClientPortal::class, ['token' => $client->public_access_token])
+            ->set('codeInput', '123456')
+            ->call('verifyAccessCode')
+            ->assertHasNoErrors()
+            ->assertSet('step', 'portal');
+    }
+
+    public function test_public_intake_form_redirects_to_portal_when_session_has_not_been_verified(): void
+    {
+        $client = Client::factory()->create();
+        $intake = Intake::factory()->for($client)->create();
 
         $url = URL::temporarySignedRoute('intake.show', now()->addDays(30), ['intake' => $intake->id]);
 
-        $this->get($url)->assertOk()->assertSee('Enter your access code');
+        $this->get($url)
+            ->assertRedirectContains('/portal/');
+    }
+
+    public function test_client_portal_creates_missing_intake_and_consent_records_before_rendering_links(): void
+    {
+        $client = Client::factory()->create([
+            'public_access_token' => 'portal-token-456',
+            'public_access_code' => Hash::make('654321'),
+            'public_access_expires_at' => now()->addDays(7),
+        ]);
+
+        Livewire::test(PublicClientPortal::class, ['token' => $client->public_access_token])
+            ->set('codeInput', '654321')
+            ->call('verifyAccessCode')
+            ->assertHasNoErrors();
+
+        $client->refresh();
+
+        $this->assertNotNull($client->intakes()->first());
+        $this->assertNotNull($client->consent);
+        $this->assertNotSame(0, $client->intakes()->first()->id);
+        $this->assertNotSame(0, $client->consent->id);
     }
 
     public function test_expired_or_tampered_signed_url_is_rejected(): void
@@ -71,6 +117,25 @@ class IntakeFormTest extends TestCase
             ->call('verifyAccessCode')
             ->assertHasNoErrors()
             ->assertSet('step', 'form');
+    }
+
+    public function test_public_intake_form_shows_a_back_to_forms_link(): void
+    {
+        $intake = Intake::factory()->withAccessCode('123456')->create();
+
+        Livewire::test(PublicIntakeForm::class, ['intake' => $intake])
+            ->set('codeInput', '123456')
+            ->call('verifyAccessCode')
+            ->assertHasNoErrors()
+            ->assertSee('Back to forms');
+    }
+
+    public function test_public_consent_form_shows_a_back_to_forms_link(): void
+    {
+        $consent = \App\Models\Consent::factory()->for(Client::factory()->create())->create();
+
+        Livewire::test(PublicConsentForm::class, ['consent' => $consent])
+            ->assertSee('Back to forms');
     }
 
     public function test_too_many_incorrect_attempts_locks_out_further_attempts(): void

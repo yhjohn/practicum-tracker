@@ -35,6 +35,12 @@ class PublicConsentForm extends Component implements HasSchemas
             return;
         }
 
+        if (! $this->isVerified()) {
+            $this->step = 'form';
+
+            return;
+        }
+
         $this->form->fill($this->consent->only(['full_name', 'agree', 'signature']));
     }
 
@@ -67,6 +73,18 @@ class PublicConsentForm extends Component implements HasSchemas
             ->title('Thank you, your consent has been signed and submitted.')
             ->success()
             ->send();
+    }
+
+    private function sessionKey(): string
+    {
+        return "client_portal.{$this->consent->client_id}";
+    }
+
+    private function isVerified(): bool
+    {
+        $verifiedUntil = session($this->sessionKey());
+
+        return $verifiedUntil && now()->lt($verifiedUntil);
     }
 
     public function render(): View
