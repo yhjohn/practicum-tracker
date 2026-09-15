@@ -3,14 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel_app
+    container_name: practicum_app
     restart: unless-stopped
     ports:
       - "8087:8080"
     environment:
       DB_HOST: "mysql"
     volumes:
-      - /volume1/docker/pt/pt:/var/www/html
+      - /volume1/docker/practicum-tracker:/var/www/html
     depends_on:
       mysql:
         condition: service_healthy
@@ -19,7 +19,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: laravel_mysql
+    container_name: practicum_mysql
     restart: unless-stopped
     environment:
       # Set your database values directly here or via Portainer Environment UI
