@@ -6,6 +6,11 @@
             <h1 class="text-xl font-semibold text-gray-900">This intake form has already been submitted</h1>
             <p class="mt-2 text-sm text-gray-600">Thank you, we've already received your responses. Please contact your counsellor if you need to make changes.</p>
         </div>
+         <div class="mt-6 flex items-center justify-between gap-3">
+            <a href="{{ route('client.portal', ['token' => $intake->client->public_access_token]) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                ← Back to forms
+            </a>
+        </div>
     @elseif ($step === 'code')
         <div class="mx-auto max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
             <h1 class="text-xl font-semibold text-gray-900">Enter your access code</h1>

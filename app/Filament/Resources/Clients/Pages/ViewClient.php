@@ -13,6 +13,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -21,6 +22,8 @@ use ToneGabes\Filament\Icons\Enums\Phosphor;
 class ViewClient extends ViewRecord
 {
     protected static string $resource = ClientResource::class;
+
+    protected Width|string|null $maxContentWidth = Width::FiveExtraLarge;
 
     protected function getHeaderActions(): array
     {
