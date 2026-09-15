@@ -64,8 +64,12 @@ class IntakeFormTest extends TestCase
 
         $url = URL::temporarySignedRoute('intake.show', now()->addDays(30), ['intake' => $intake->id]);
 
-        $this->get($url)
+        $redirect = $this->get($url)
             ->assertRedirectContains('/portal/');
+
+        $this->get($redirect->headers->get('Location'))
+            ->assertOk()
+            ->assertSee('Enter your access code');
     }
 
     public function test_client_portal_creates_missing_intake_and_consent_records_before_rendering_links(): void

@@ -7,7 +7,7 @@
             <p class="mt-2 text-sm text-gray-600">Thank you, we've already received your responses. Please contact your counsellor if you need to make changes.</p>
         </div>
          <div class="mt-6 flex items-center justify-between gap-3">
-            <a href="{{ route('client.portal', ['token' => $intake->client->public_access_token]) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+            <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('client.portal', $intake->client->public_access_expires_at, ['token' => $intake->client->public_access_token]) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
                 ← Back to forms
             </a>
         </div>
@@ -39,7 +39,7 @@
         </form>
 
         <div class="mt-6 flex items-center justify-between gap-3">
-            <a href="{{ route('client.portal', ['token' => $intake->client->public_access_token]) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+            <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('client.portal', $intake->client->public_access_expires_at, ['token' => $intake->client->public_access_token]) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
                 ← Back to forms
             </a>
 

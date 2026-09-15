@@ -6,6 +6,7 @@ use App\Livewire\PublicIntakeForm;
 use App\Models\Consent;
 use App\Models\Intake;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 Route::get('/', function () {
     return redirect('/admin');
@@ -17,7 +18,7 @@ Route::get('/portal/{token}', PublicClientPortal::class)
 
 Route::get('/intake/{intake}', function (Intake $intake) {
     if (! session("client_portal.{$intake->client_id}") || now()->gt(session("client_portal.{$intake->client_id}"))) {
-        return redirect()->route('client.portal', ['token' => $intake->client->public_access_token]);
+        return redirect()->to(URL::temporarySignedRoute('client.portal', $intake->client->public_access_expires_at, ['token' => $intake->client->public_access_token]));
     }
 
     return app()->call(PublicIntakeForm::class.'@__invoke', ['intake' => $intake]);
@@ -25,7 +26,7 @@ Route::get('/intake/{intake}', function (Intake $intake) {
 
 Route::get('/consent/{consent}', function (Consent $consent) {
     if (! session("client_portal.{$consent->client_id}") || now()->gt(session("client_portal.{$consent->client_id}"))) {
-        return redirect()->route('client.portal', ['token' => $consent->client->public_access_token]);
+        return redirect()->to(URL::temporarySignedRoute('client.portal', $consent->client->public_access_expires_at, ['token' => $consent->client->public_access_token]));
     }
 
     return app()->call(PublicConsentForm::class.'@__invoke', ['consent' => $consent]);
