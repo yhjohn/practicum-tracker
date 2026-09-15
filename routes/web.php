@@ -3,7 +3,6 @@
 use App\Livewire\PublicClientPortal;
 use App\Livewire\PublicConsentForm;
 use App\Livewire\PublicIntakeForm;
-use App\Models\Client;
 use App\Models\Consent;
 use App\Models\Intake;
 use Illuminate\Support\Facades\Route;

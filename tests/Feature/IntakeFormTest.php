@@ -8,6 +8,7 @@ use App\Livewire\PublicClientPortal;
 use App\Livewire\PublicConsentForm;
 use App\Livewire\PublicIntakeForm;
 use App\Models\Client;
+use App\Models\Consent;
 use App\Models\Intake;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,9 +83,9 @@ class IntakeFormTest extends TestCase
 
         $client->refresh();
 
-        $this->assertNotNull($client->intakes()->first());
+        $this->assertNotNull($client->intake);
         $this->assertNotNull($client->consent);
-        $this->assertNotSame(0, $client->intakes()->first()->id);
+        $this->assertNotSame(0, $client->intake->id);
         $this->assertNotSame(0, $client->consent->id);
     }
 
@@ -132,7 +133,7 @@ class IntakeFormTest extends TestCase
 
     public function test_public_consent_form_shows_a_back_to_forms_link(): void
     {
-        $consent = \App\Models\Consent::factory()->for(Client::factory()->create())->create();
+        $consent = Consent::factory()->for(Client::factory()->create())->create();
 
         Livewire::test(PublicConsentForm::class, ['consent' => $consent])
             ->assertSee('Back to forms');

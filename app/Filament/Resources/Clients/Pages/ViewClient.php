@@ -11,7 +11,6 @@ use App\Models\Intake;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Hash;
@@ -64,49 +63,26 @@ class ViewClient extends ViewRecord
             Action::make('downloadIntakePdf')
                 ->label('Download intake PDF')
                 ->icon(Phosphor::FileArrowDown)
-                ->modalHeading('Download intake PDF')
-                ->visible(fn (Client $record): bool => $record->intakes()->where('status', IntakeStatus::Submitted)->exists())
-                ->fillForm(fn (Client $record): array => [
-                    'intake_id' => $record->intakes()->where('status', IntakeStatus::Submitted)->latest()->value('id'),
-                ])
-                ->schema(fn (Client $record): array => [
-                    Select::make('intake_id')
-                        ->label('Submitted intake')
-                        ->options(fn (): array => $record->intakes()
-                            ->where('status', IntakeStatus::Submitted)
-                            ->latest()
-                            ->get()
-                            ->mapWithKeys(fn (Intake $intake): array => [$intake->id => $intake->submitted_at?->format('d M Y, H:i')])
-                            ->all())
-                        ->required(),
-                ])
-                ->action(function (array $data) {
-                    $intake = Intake::findOrFail($data['intake_id']);
-
-                    return response()->streamDownload(
-                        fn () => print (Pdf::loadView('pdf.intake', ['intake' => $intake])->output()),
-                        "intake-{$intake->name}-{$intake->id}.pdf",
-                    );
-                }),
+                ->visible(fn (Client $record): bool => $record->intake?->status === IntakeStatus::Submitted)
+                ->action(fn (Client $record) => response()->streamDownload(
+                    fn () => print (Pdf::loadView('pdf.intake', ['intake' => $record->intake])->output()),
+                    "intake-{$record->intake->name}-{$record->intake->id}.pdf",
+                )),
             EditAction::make(),
         ];
     }
 
     private function pendingIntakeFor(Client $client): Intake
     {
-        return $client->intakes()
-            ->where('status', IntakeStatus::Pending)
-            ->latest()
-            ->first()
-            ?? $client->intakes()->create([
-                'status' => IntakeStatus::Pending,
-                'name' => $client->name,
-                'email' => $client->email,
-                'phone' => $client->phone,
-                'dob' => $client->dob,
-                'emergency_name' => $client->emergency_contact,
-                'emergency_phone' => $client->emergency_contact_phone,
-            ]);
+        return $client->intake ?? $client->intake()->create([
+            'status' => IntakeStatus::Pending,
+            'name' => $client->name,
+            'email' => $client->email,
+            'phone' => $client->phone,
+            'dob' => $client->dob,
+            'emergency_name' => $client->emergency_contact,
+            'emergency_phone' => $client->emergency_contact_phone,
+        ]);
     }
 
     private function pendingConsentFor(Client $client): Consent

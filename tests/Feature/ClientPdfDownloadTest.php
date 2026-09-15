@@ -52,13 +52,11 @@ class ClientPdfDownloadTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
         $client = Client::factory()->create();
-        $intake = Intake::factory()->for($client)->submitted()->create();
+        Intake::factory()->for($client)->submitted()->create();
 
         Livewire::test(ViewClient::class, ['record' => $client->getRouteKey()])
             ->assertActionVisible('downloadIntakePdf')
-            ->mountAction('downloadIntakePdf')
-            ->assertActionDataSet(['intake_id' => $intake->id])
-            ->callMountedAction()
+            ->callAction('downloadIntakePdf')
             ->assertHasNoActionErrors();
     }
 

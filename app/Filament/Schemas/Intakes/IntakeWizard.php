@@ -8,6 +8,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Callout;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard\Step;
 
@@ -37,6 +40,7 @@ class IntakeWizard
             Step::make('Personal Information')
                 ->schema([
                     TextInput::make('name')->label('Full name'),
+
                     DatePicker::make('dob')->label('Date of birth'),
                     TextInput::make('age')->numeric()->minValue(0)->maxValue(120),
                     TextInput::make('phone')->tel(),
@@ -49,16 +53,24 @@ class IntakeWizard
                             'Non-binary' => 'Non-binary',
                             'Prefer not to say' => 'Prefer not to say',
                         ])
-                        ->inline()
-                        ->helperText('Optional.'),
-                    TextInput::make('emergency_name')->label("Emergency contact's full name"),
-                    TextInput::make('emergency_relationship')->label('Relationship to you'),
-                    TextInput::make('emergency_phone')->label('Emergency contact phone number')->tel(),
+                        ->inline(),
+                    Fieldset::make('Emergency Contact')->schema([
+                        Callout::make('')
+                            ->description('Providing an emergency contact is optional. If you choose to provide one, your counselor will only contact this person in an urgent situation involving your safety or wellbeing, and strictly within the limits of confidentiality.')
+                            ->warning()
+                            ->columnSpanFull(),
+                        Grid::make(3)->schema([
+                            TextInput::make('emergency_name')->label("Emergency contact's full name"),
+                            TextInput::make('emergency_relationship')->label('Relationship to you'),
+                            TextInput::make('emergency_phone')->label('Emergency contact phone number')->tel(),
+                        ])->columnSpanFull(),
+                    ]),
                 ]),
 
             Step::make('Marital / Relationship Status')
                 ->schema([
                     Radio::make('marital')
+                        ->label('Relationship status')
                         ->options([
                             'Single' => 'Single',
                             'Married' => 'Married',
@@ -71,7 +83,7 @@ class IntakeWizard
                     TextInput::make('marriages')->label('Number of previous marriages (if applicable)')->numeric()->minValue(0),
                 ]),
 
-            Step::make('Education')
+            Step::make('Education & Career')
                 ->schema([
                     TextInput::make('education')->label('Highest level of education completed'),
                     Radio::make('education_current')
@@ -83,10 +95,6 @@ class IntakeWizard
                             'Other training' => 'Other training',
                         ]),
                     Textarea::make('education_details')->label('Relevant details or circumstances'),
-                ]),
-
-            Step::make('Career / Employment')
-                ->schema([
                     TextInput::make('job_title')->label('Current employment / job title'),
                     Textarea::make('employment_history')->label('Employment history and relevant circumstances'),
                     Textarea::make('job_satisfaction')->label('Job satisfaction (1–5) and why'),
@@ -175,7 +183,7 @@ class IntakeWizard
 
     protected static function summaryStep(): Step
     {
-        return Step::make('Review & Sign')
+        return Step::make('Review & Submit')
             ->schema([
                 ...IntakeSummary::sections(),
 

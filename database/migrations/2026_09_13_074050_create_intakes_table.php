@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('intakes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('client_id')->unique()->constrained()->cascadeOnDelete();
             $table->string('status')->default('pending');
 
             // Personal information

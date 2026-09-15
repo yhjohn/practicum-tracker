@@ -16,9 +16,9 @@ class ClientInfolist
     {
         return $schema
             ->components([
+                Section::make('Information')
+                ->schema([
                 TextEntry::make('name'),
-                TextEntry::make('display_name')
-                    ->placeholder('-'),
                 TextEntry::make('email')
                     ->label('Email address'),
                 TextEntry::make('phone'),
@@ -29,61 +29,57 @@ class ClientInfolist
                     ->placeholder('-'),
                 TextEntry::make('emergency_contact_phone')
                     ->placeholder('-'),
-                TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                ]),
+                Grid::make(2)->schema([
+                    Section::make('Intake forms')
 
-                Section::make('Intake forms')
-                    ->columnSpanFull()
-                    ->schema([
-                        RepeatableEntry::make('intakes')
-                            ->hiddenLabel()
-                            ->schema([
-                                Grid::make(3)
-                                    ->schema([
-                                        TextEntry::make('status')
-                                            ->badge(),
-                                        TextEntry::make('submitted_at')
-                                            ->dateTime()
-                                            ->placeholder('Not yet submitted'),
-                                        TextEntry::make('created_at')
-                                            ->label('Link generated')
-                                            ->dateTime(),
-                                    ]),
+                        ->schema([
+                            Grid::make(3)
+                                ->schema([
+                                    TextEntry::make('intake.status')
+                                        ->label('Status')
+                                        ->badge()
+                                        ->placeholder('Not yet generated'),
+                                    TextEntry::make('intake.submitted_at')
+                                        ->dateTime()
+                                        ->placeholder('Not yet submitted'),
+                                    TextEntry::make('intake.created_at')
+                                        ->label('Link generated')
+                                        ->dateTime()
+                                        ->placeholder('-'),
+                                ]),
 
-                                ...collect(IntakeSummary::sections())
-                                    ->all(),
-                            ]),
-                    ])
-                    ->collapsible(),
+                            ...collect(IntakeSummary::sections('intake.'))
+                                ->all(),
+                        ])
+                        ->collapsible(),
 
-                Section::make('Informed Consent')
-                    ->columnSpanFull()
-                    ->collapsible()
-                    ->schema([
-                        Grid::make(3)
-                            ->schema([
-                                TextEntry::make('consent.status')
-                                    ->label('Status')
-                                    ->badge()
-                                    ->placeholder('Not yet generated'),
-                                TextEntry::make('consent.full_name')
-                                    ->label('Full name')
-                                    ->placeholder('-'),
-                                TextEntry::make('consent.submitted_at')
-                                    ->label('Signed at')
-                                    ->dateTime()
-                                    ->placeholder('Not yet submitted'),
-                            ]),
-                        ImageEntry::make('consent.signature')
-                            ->label('Signature')
-                            ->hiddenLabel()
-                            ->height('8rem')
-                            ->placeholder('Not yet signed'),
-                    ]),
+                    Section::make('Informed Consent')
+
+                        ->collapsible()
+                        ->schema([
+                            Grid::make(3)
+                                ->schema([
+                                    TextEntry::make('consent.status')
+                                        ->label('Status')
+                                        ->badge()
+                                        ->placeholder('Not yet generated'),
+                                    TextEntry::make('consent.full_name')
+                                        ->label('Full name')
+                                        ->placeholder('-'),
+                                    TextEntry::make('consent.submitted_at')
+                                        ->label('Signed at')
+                                        ->dateTime()
+                                        ->placeholder('Not yet submitted'),
+                                ]),
+                            ImageEntry::make('consent.signature')
+                                ->label('Signature')
+                                ->hiddenLabel()
+                                ->height('8rem')
+                                ->placeholder('Not yet signed'),
+                        ]),
+                ])->columnSpanFull(),
+
             ]);
     }
 }

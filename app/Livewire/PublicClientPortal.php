@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Enums\ConsentStatus;
 use App\Enums\IntakeStatus;
 use App\Models\Client;
 use Filament\Notifications\Notification;
@@ -72,16 +71,15 @@ class PublicClientPortal extends Component
         $consent = null;
 
         if ($this->client) {
-            $intake = $this->client->intakes()->latest()->first()
-                ?? $this->client->intakes()->create([
-                    'status' => IntakeStatus::Pending,
-                    'name' => $this->client->name,
-                    'email' => $this->client->email,
-                    'phone' => $this->client->phone,
-                    'dob' => $this->client->dob,
-                    'emergency_name' => $this->client->emergency_contact,
-                    'emergency_phone' => $this->client->emergency_contact_phone,
-                ]);
+            $intake = $this->client->intake ?? $this->client->intake()->create([
+                'status' => IntakeStatus::Pending,
+                'name' => $this->client->name,
+                'email' => $this->client->email,
+                'phone' => $this->client->phone,
+                'dob' => $this->client->dob,
+                'emergency_name' => $this->client->emergency_contact,
+                'emergency_phone' => $this->client->emergency_contact_phone,
+            ]);
 
             $consent = $this->client->consent ?? $this->client->consent()->create([
                 'full_name' => $this->client->name,

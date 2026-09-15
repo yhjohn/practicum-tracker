@@ -6,7 +6,6 @@ use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Hash;
@@ -60,9 +59,9 @@ class Client extends Model
             ->withTimestamps();
     }
 
-    public function intakes(): HasMany
+    public function intake(): HasOne
     {
-        return $this->hasMany(Intake::class);
+        return $this->hasOne(Intake::class);
     }
 
     public function consent(): HasOne
