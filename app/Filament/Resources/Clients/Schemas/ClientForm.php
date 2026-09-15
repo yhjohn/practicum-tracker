@@ -18,8 +18,7 @@ class ClientForm
                     ->default(null),
                 TextInput::make('email')
                     ->label('Email address')
-                    ->email()
-                    ->required(),
+                    ->email(),
                 TextInput::make('phone')
                     ->tel()
                     ->required(),

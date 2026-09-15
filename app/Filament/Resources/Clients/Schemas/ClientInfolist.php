@@ -70,8 +70,7 @@ class ClientInfolist
                                             ->date()
                                             ->placeholder('-'),
                                     ])
-                                    ->collapsible()
-                                    ->collapsed(),
+                                    ->collapsible(),
                             ]),
                     ])
                     ->collapsible(),
