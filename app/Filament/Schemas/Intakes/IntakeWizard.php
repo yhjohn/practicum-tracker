@@ -43,7 +43,7 @@ class IntakeWizard
 
                     DatePicker::make('dob')->label('Date of birth'),
                     TextInput::make('age')->numeric()->minValue(0)->maxValue(120),
-                    TextInput::make('phone')->tel(),
+                    TextInput::make('phone')->tel()->prefix('+60 '),
                     TextInput::make('email')->email(),
                     TextInput::make('occupation'),
                     Radio::make('sex')
@@ -62,7 +62,7 @@ class IntakeWizard
                         Grid::make(3)->schema([
                             TextInput::make('emergency_name')->label("Emergency contact's full name"),
                             TextInput::make('emergency_relationship')->label('Relationship to you'),
-                            TextInput::make('emergency_phone')->label('Emergency contact phone number')->tel(),
+                            TextInput::make('emergency_phone')->label('Emergency contact phone number')->tel()->prefix('+60 '),
                         ])->columnSpanFull(),
                     ]),
                 ]),
