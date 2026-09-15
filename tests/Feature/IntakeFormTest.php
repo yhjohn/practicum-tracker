@@ -117,7 +117,6 @@ class IntakeFormTest extends TestCase
             'dob' => '1990-01-01',
             'emergency_name' => 'Jane Doe',
             'emergency_phone' => '555-0100',
-            'signature' => 'data:image/png;base64,iVBORw0KGgo=',
         ])
             ->call('submit')
             ->assertHasNoFormErrors();
@@ -142,7 +141,6 @@ class IntakeFormTest extends TestCase
 
         $testable->fillForm([
             'emergency_name' => 'New Contact',
-            'signature' => 'data:image/png;base64,iVBORw0KGgo=',
         ])
             ->call('submit')
             ->assertHasNoFormErrors();

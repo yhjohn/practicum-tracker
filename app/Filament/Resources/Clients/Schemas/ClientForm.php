@@ -14,8 +14,6 @@ class ClientForm
             ->components([
                 TextInput::make('name')
                     ->required(),
-                TextInput::make('display_name')
-                    ->default(null),
                 TextInput::make('email')
                     ->label('Email address')
                     ->email(),

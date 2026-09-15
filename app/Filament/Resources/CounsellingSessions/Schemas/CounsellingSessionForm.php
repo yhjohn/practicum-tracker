@@ -12,7 +12,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Utilities\Get;
@@ -27,30 +26,30 @@ class CounsellingSessionForm
             ->components([
                 Flex::make([
 
-                Select::make('type')
-                    ->options(SessionType::class)
-                    ->live()
-                    ->required(),
-                Select::make('client_id')
-                    ->label('Client')
-                    ->options(Client::query()->pluck('name', 'id'))
-                    ->searchable()
-                    ->visible(fn(Get $get): bool => $get('type') === SessionType::Individual)
-                    ->required(fn(Get $get): bool => $get('type') === SessionType::Individual),
-                Select::make('group_id')
-                    ->label('Group')
-                    ->options(Group::query()->pluck('name', 'id'))
-                    ->searchable()
-                    ->live()
-                    ->visible(fn(Get $get): bool => $get('type') === SessionType::Group)
-                    ->required(fn(Get $get): bool => $get('type') === SessionType::Group),
-                CheckboxList::make('attendee_ids')
-                    ->label('Attendance')
-                    ->options(fn(Get $get) => Group::find($get('group_id'))?->clients()->pluck('name', 'clients.id') ?? [])
-                    ->bulkToggleable()
-                    ->visible(fn(Get $get): bool => $get('type') === SessionType::Group && filled($get('group_id')))
-                    ->columnSpanFull(),
-            ])->columnSpanFull(),
+                    Select::make('type')
+                        ->options(SessionType::class)
+                        ->live()
+                        ->required(),
+                    Select::make('client_id')
+                        ->label('Client')
+                        ->options(Client::query()->pluck('name', 'id'))
+                        ->searchable()
+                        ->visible(fn (Get $get): bool => $get('type') === SessionType::Individual)
+                        ->required(fn (Get $get): bool => $get('type') === SessionType::Individual),
+                    Select::make('group_id')
+                        ->label('Group')
+                        ->options(Group::query()->pluck('name', 'id'))
+                        ->searchable()
+                        ->live()
+                        ->visible(fn (Get $get): bool => $get('type') === SessionType::Group)
+                        ->required(fn (Get $get): bool => $get('type') === SessionType::Group),
+                    CheckboxList::make('attendee_ids')
+                        ->label('Attendance')
+                        ->options(fn (Get $get) => Group::find($get('group_id'))?->clients()->pluck('name', 'clients.id') ?? [])
+                        ->bulkToggleable()
+                        ->visible(fn (Get $get): bool => $get('type') === SessionType::Group && filled($get('group_id')))
+                        ->columnSpanFull(),
+                ])->columnSpanFull(),
                 TextInput::make('week')
                     ->label('Week no.'),
                 DatePicker::make('session_date')

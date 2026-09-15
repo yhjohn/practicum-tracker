@@ -13,7 +13,6 @@ use App\Models\Client;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use ToneGabes\Filament\Icons\Enums\Phosphor;
 
@@ -22,7 +21,9 @@ class ClientResource extends Resource
     protected static ?string $model = Client::class;
 
     protected static string|BackedEnum|null $navigationIcon = Phosphor::User;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Client management';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

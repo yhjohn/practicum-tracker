@@ -20,8 +20,6 @@ class ClientsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('display_name')
-                    ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
@@ -51,7 +49,7 @@ class ClientsTable
                 EditAction::make(),
                 Action::make('createSession')
                     ->label('Create session')
-                    ->url(fn(Client $record): string => CounsellingSessionResource::getUrl('create', [
+                    ->url(fn (Client $record): string => CounsellingSessionResource::getUrl('create', [
                         'type' => 'individual',
                         'client_id' => $record->id,
                     ])),

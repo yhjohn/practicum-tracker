@@ -5,8 +5,8 @@ namespace App\Providers;
 use App\Models\Client;
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

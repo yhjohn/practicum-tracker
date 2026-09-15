@@ -14,7 +14,7 @@ class EditCounsellingSession extends EditRecord
 {
     protected static string $resource = CounsellingSessionResource::class;
 
-    protected Width | string | null $maxContentWidth = Width::FourExtraLarge;
+    protected Width|string|null $maxContentWidth = Width::FourExtraLarge;
 
     /**
      * @var array<int>

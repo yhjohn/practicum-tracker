@@ -26,7 +26,7 @@ class CounsellingSessionInfolist
                     ->placeholder('-'),
                 TextEntry::make('duration_minutes')
                     ->label('Duration')
-                    ->formatStateUsing(fn(?int $state): string => CounsellingSession::formatMinutesToDuration($state) ?? '-'),
+                    ->formatStateUsing(fn (?int $state): string => CounsellingSession::formatMinutesToDuration($state) ?? '-'),
                 TextEntry::make('session_notes')
                     ->placeholder('-')
                     ->html()

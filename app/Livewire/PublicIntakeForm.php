@@ -139,6 +139,7 @@ class PublicIntakeForm extends Component implements HasActions, HasSchemas
 
         $this->intake->fill($data);
         $this->intake->status = IntakeStatus::Submitted;
+        $this->intake->signature_date = now();
         $this->intake->submitted_at = now();
         $this->intake->save();
 
@@ -185,7 +186,6 @@ class PublicIntakeForm extends Component implements HasActions, HasSchemas
             'emotions', 'safety', 'support_system', 'current_stress', 'memory',
             'belief_system', 'spiritual_upbringing',
             'seeking_reason', 'first_occurred', 'main_concern', 'family_concern', 'counselling_outcome', 'anything_else',
-            'signature', 'signature_date',
         ]);
     }
 

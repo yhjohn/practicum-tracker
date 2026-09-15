@@ -10,7 +10,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard\Step;
-use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class IntakeWizard
 {
@@ -180,18 +179,9 @@ class IntakeWizard
             ->schema([
                 ...IntakeSummary::sections(),
 
-                Section::make('Confidentiality Acknowledgement and Signature')
+                Section::make('Confidentiality Acknowledgement')
                     ->description('My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.')
-                    ->schema([
-                        SignaturePad::make('signature')
-                            ->backgroundColor('#ffffff')
-                            ->backgroundColorOnDark('#ffffff')
-                            ->penColor('#000')
-                            ->penColorOnDark('#000')
-                            ->label('Client signature')
-                            ->required(),
-                        DatePicker::make('signature_date')->label('Date')->default(now()),
-                    ]),
+                    ->schema([]),
             ]);
     }
 }

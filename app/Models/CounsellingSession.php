@@ -78,7 +78,7 @@ class CounsellingSession extends Model
         $hours = intdiv($minutes, 60);
         $remainingMinutes = $minutes % 60;
 
-        return trim(($hours > 0 ? "{$hours}h " : '') . ($remainingMinutes > 0 ? "{$remainingMinutes}m" : ''));
+        return trim(($hours > 0 ? "{$hours}h " : '').($remainingMinutes > 0 ? "{$remainingMinutes}m" : ''));
     }
 
     /**

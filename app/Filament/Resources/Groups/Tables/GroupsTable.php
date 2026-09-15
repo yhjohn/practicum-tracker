@@ -39,7 +39,7 @@ class GroupsTable
                 EditAction::make(),
                 Action::make('createSession')
                     ->label('Create session')
-                    ->url(fn(Group $record): string => CounsellingSessionResource::getUrl('create', [
+                    ->url(fn (Group $record): string => CounsellingSessionResource::getUrl('create', [
                         'type' => 'group',
                         'group_id' => $record->id,
                     ])),

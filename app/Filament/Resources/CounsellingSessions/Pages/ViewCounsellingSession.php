@@ -11,7 +11,7 @@ class ViewCounsellingSession extends ViewRecord
 {
     protected static string $resource = CounsellingSessionResource::class;
 
-    protected Width | string | null $maxContentWidth = Width::FourExtraLarge;
+    protected Width|string|null $maxContentWidth = Width::FourExtraLarge;
 
     protected function getHeaderActions(): array
     {

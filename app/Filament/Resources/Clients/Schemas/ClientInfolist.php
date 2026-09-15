@@ -55,22 +55,7 @@ class ClientInfolist
                                     ]),
 
                                 ...collect(IntakeSummary::sections())
-
                                     ->all(),
-
-                                Section::make('Confidentiality Acknowledgement and Signature')
-                                    ->schema([
-                                        ImageEntry::make('signature')
-                                            ->label('Signature')
-                                            ->hiddenLabel()
-                                            ->height('8rem')
-                                            ->placeholder('Not yet signed'),
-                                        TextEntry::make('signature_date')
-                                            ->label('Date signed')
-                                            ->date()
-                                            ->placeholder('-'),
-                                    ])
-                                    ->collapsible(),
                             ]),
                     ])
                     ->collapsible(),

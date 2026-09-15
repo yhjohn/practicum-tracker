@@ -32,7 +32,7 @@ class CounsellingSessionsTable
                     ->placeholder('-'),
                 TextColumn::make('duration_minutes')
                     ->label('Duration')
-                    ->formatStateUsing(fn(?int $state): string => CounsellingSession::formatMinutesToDuration($state) ?? '-'),
+                    ->formatStateUsing(fn (?int $state): string => CounsellingSession::formatMinutesToDuration($state) ?? '-'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
