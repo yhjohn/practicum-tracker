@@ -15,3 +15,35 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/**
+ * The public intake wizard reuses Filament's default form field styling,
+ * which is sized for dense admin screens. Bump label/question prominence
+ * and lean into the amber primary color so it reads clearly as a form
+ * meant for a client to fill in unassisted.
+ */
+.intake-form {
+    & .fi-sc-section-label {
+        @apply text-lg font-semibold text-primary-700;
+    }
+
+    & .fi-fo-field-label-content
+    /* & .fi-fo-radio-label-text, */
+    /* & .fi-fo-checkbox-list-option-label */
+     {
+        @apply text-base font-semibold text-primary-700 mb-1;
+    }
+
+    & .fi-fo-field-label-content .fi-fo-field-label-required-mark {
+        @apply text-danger-600;
+    }
+
+    & .fi-input,
+    & textarea.fi-input {
+        @apply text-base;
+    }
+
+    & .fi-sc-wizard-header-step-label {
+        @apply text-base;
+    }
+}

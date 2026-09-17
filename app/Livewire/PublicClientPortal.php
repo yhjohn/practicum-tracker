@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Enums\IntakeStatus;
 use App\Models\Client;
+use App\Models\IntakeV2;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
@@ -71,25 +71,19 @@ class PublicClientPortal extends Component
         $consent = null;
 
         if ($this->client) {
-            $intake = $this->client->intake ?? $this->client->intake()->create([
-                'status' => IntakeStatus::Pending,
-                'name' => $this->client->name,
-                'email' => $this->client->email,
-                'phone' => $this->client->phone,
-                'dob' => $this->client->dob,
-                'emergency_name' => $this->client->emergency_contact,
-                'emergency_phone' => $this->client->emergency_contact_phone,
-            ]);
+            $intake = $this->client->currentIntake();
 
             $consent = $this->client->consent ?? $this->client->consent()->create([
                 'full_name' => $this->client->name,
             ]);
         }
 
+        $intakeRouteName = $intake instanceof IntakeV2 ? 'intake-v2.show' : 'intake.show';
+
         return view('livewire.public-client-portal', [
             'intake' => $intake,
             'consent' => $consent,
-            'intakeUrl' => $intake ? URL::temporarySignedRoute('intake.show', now()->addDays(30), ['intake' => $intake->id]) : null,
+            'intakeUrl' => $intake ? URL::temporarySignedRoute($intakeRouteName, now()->addDays(30), ['intake' => $intake->id]) : null,
             'consentUrl' => $consent ? URL::temporarySignedRoute('consent.show', now()->addDays(30), ['consent' => $consent->id]) : null,
         ]);
     }
