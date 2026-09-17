@@ -71,6 +71,14 @@ class ViewClient extends ViewRecord
                     fn () => print (Pdf::loadView('pdf.intake', ['intake' => $record->intake])->output()),
                     "intake-{$record->intake->name}-{$record->intake->id}.pdf",
                 )),
+            Action::make('downloadIntakeV2Pdf')
+                ->label('Download intake PDF')
+                ->icon(Phosphor::FileArrowDown)
+                ->visible(fn (Client $record): bool => $record->intakeV2?->status === IntakeStatus::Submitted)
+                ->action(fn (Client $record) => response()->streamDownload(
+                    fn () => print (Pdf::loadView('pdf.intake-v2', ['intake' => $record->intakeV2])->output()),
+                    "intake-{$record->intakeV2->name}-{$record->intakeV2->id}.pdf",
+                )),
             EditAction::make(),
         ];
     }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\IntakeStatus;
+use App\Enums\IntakeVersion;
 use App\Filament\Resources\Clients\Pages\ViewClient;
 use App\Livewire\PublicClientPortal;
 use App\Livewire\PublicConsentForm;
@@ -78,6 +79,7 @@ class IntakeFormTest extends TestCase
             'public_access_token' => 'portal-token-456',
             'public_access_code' => Hash::make('654321'),
             'public_access_expires_at' => now()->addDays(7),
+            'intake_version' => IntakeVersion::V1,
         ]);
 
         Livewire::test(PublicClientPortal::class, ['token' => $client->public_access_token])

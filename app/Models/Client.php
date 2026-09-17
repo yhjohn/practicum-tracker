@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\IntakeStatus;
+use App\Enums\IntakeVersion;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +23,7 @@ class Client extends Model
     protected $casts = [
         'dob' => 'date',
         'public_access_expires_at' => 'datetime',
+        'intake_version' => IntakeVersion::class,
     ];
 
     protected static function booted(): void
@@ -36,6 +39,10 @@ class Client extends Model
 
             if (empty($client->public_access_expires_at)) {
                 $client->public_access_expires_at = now()->addDays(30);
+            }
+
+            if (empty($client->intake_version)) {
+                $client->intake_version = IntakeVersion::V2;
             }
         });
     }
@@ -62,6 +69,37 @@ class Client extends Model
     public function intake(): HasOne
     {
         return $this->hasOne(Intake::class);
+    }
+
+    public function intakeV2(): HasOne
+    {
+        return $this->hasOne(IntakeV2::class);
+    }
+
+    /**
+     * Resolve this client's current intake, creating a pending one prefilled
+     * from known client details if it doesn't exist yet.
+     */
+    public function currentIntake(): Intake|IntakeV2
+    {
+        if ($this->intake_version === IntakeVersion::V1) {
+            return $this->intake ?? $this->intake()->create([
+                'status' => IntakeStatus::Pending,
+                'name' => $this->name,
+                'email' => $this->email,
+                'phone' => $this->phone,
+                'dob' => $this->dob,
+                'emergency_name' => $this->emergency_contact,
+                'emergency_phone' => $this->emergency_contact_phone,
+            ]);
+        }
+
+        return $this->intakeV2 ?? $this->intakeV2()->create([
+            'status' => IntakeStatus::Pending,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ]);
     }
 
     public function consent(): HasOne

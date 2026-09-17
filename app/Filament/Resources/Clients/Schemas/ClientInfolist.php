@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Filament\Schemas\Intakes\IntakeSummary;
+use App\Filament\Schemas\Intakes\IntakeSummaryV2;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -72,6 +73,29 @@ class ClientInfolist
                             ]),
 
                         ...collect(IntakeSummary::sections('intake.'))
+                            ->all(),
+                    ])
+                    ->columnSpanFull()
+                    ->collapsible(),
+
+                Section::make('Intake forms (new)')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('intakeV2.status')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->placeholder('Not yet generated'),
+                                TextEntry::make('intakeV2.submitted_at')
+                                    ->dateTime()
+                                    ->placeholder('Not yet submitted'),
+                                TextEntry::make('intakeV2.created_at')
+                                    ->label('Link generated')
+                                    ->dateTime()
+                                    ->placeholder('-'),
+                            ]),
+
+                        ...collect(IntakeSummaryV2::sections('intakeV2.'))
                             ->all(),
                     ])
                     ->columnSpanFull()
