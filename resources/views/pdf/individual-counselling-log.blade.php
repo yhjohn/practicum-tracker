@@ -13,11 +13,6 @@
         table.header td.label { width: 140px; font-weight: bold; }
         .part-body { line-height: 1.5; }
         .part-body p { margin: 4px 0; }
-        .signature-box { border: 1px solid #d1d5db; padding: 8px; margin-top: 6px; }
-        .signature-box img { height: 80px; }
-        table.summary { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        table.summary td { padding: 6px 0; vertical-align: top; }
-        table.summary td.label { width: 160px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -56,24 +51,5 @@
 
     <h2>Part 4: Evaluation of Counseling Session</h2>
     <div class="part-body">{!! $log->part4_evaluation ?: '<p>-</p>' !!}</div>
-
-    <table class="summary">
-        <tr>
-            <td class="label">Date and Time</td>
-            <td>{{ optional($log->signed_at)->format('d M Y, H:i') ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Signature</td>
-            <td>
-                <div class="signature-box">
-                    @if ($log->signature)
-                        <img src="{{ $log->signature }}" alt="Signature">
-                    @else
-                        Not signed
-                    @endif
-                </div>
-            </td>
-        </tr>
-    </table>
 </body>
 </html>

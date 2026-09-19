@@ -26,9 +26,6 @@ return new class extends Migration
             $table->longText('part3_treatment_plan')->nullable();
             $table->longText('part4_evaluation')->nullable();
 
-            $table->longText('signature')->nullable();
-            $table->timestamp('signed_at')->nullable();
-
             $table->timestamps();
         });
     }

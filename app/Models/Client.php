@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * @property Consent $consent
+ * @property Intake $intake
+ * @property IntakeV2 $intakeV2
+ */
 class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */

@@ -21,13 +21,4 @@ class EditIndividualCounsellingLog extends EditRecord
             DeleteAction::make(),
         ];
     }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $data['signed_at'] = filled($data['signature'] ?? null)
-            ? ($this->getRecord()->signed_at ?? now())
-            : null;
-
-        return $data;
-    }
 }

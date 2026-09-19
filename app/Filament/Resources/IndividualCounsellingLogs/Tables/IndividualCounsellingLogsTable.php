@@ -27,11 +27,11 @@ class IndividualCounsellingLogsTable
                     ->placeholder('-'),
                 TextColumn::make('place')
                     ->placeholder('-'),
-                TextColumn::make('signed_at')
-                    ->label('Signed')
+                TextColumn::make('written_at')
+                    ->label('Report written on')
                     ->dateTime()
-                    ->placeholder('Draft')
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\IndividualCounsellingLogs\Pages;
 
 use App\Filament\Resources\IndividualCounsellingLogs\IndividualCounsellingLogResource;
+use App\Models\IndividualCounsellingLog;
+use Carbon\Carbon;
 use Filament\Resources\Pages\CreateRecord;
 use YousefAman\FilamentAutosave\HasAutosaveForCreate;
 
@@ -14,7 +16,11 @@ class CreateIndividualCounsellingLog extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['signed_at'] = filled($data['signature'] ?? null) ? now() : null;
+        if (filled($data['session_date'] ?? null) && filled($data['start_time'] ?? null)) {
+            $sessionStart = Carbon::parse($data['session_date'].' '.$data['start_time']);
+
+            $data['written_at'] = IndividualCounsellingLog::randomWrittenAt($sessionStart);
+        }
 
         return $data;
     }

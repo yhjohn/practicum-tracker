@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\IndividualCounsellingLogs\Schemas;
 
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -50,14 +49,10 @@ class IndividualCounsellingLogInfolist
                     ->placeholder('-')
                     ->columnSpanFull(),
 
-                TextEntry::make('signed_at')
-                    ->label('Date and Time')
+                TextEntry::make('written_at')
+                    ->label('Report written on')
                     ->dateTime()
                     ->placeholder('-'),
-                ImageEntry::make('signature')
-                    ->hiddenLabel()
-                    ->height(80)
-                    ->visible(fn (?string $state): bool => filled($state)),
             ]);
     }
 }

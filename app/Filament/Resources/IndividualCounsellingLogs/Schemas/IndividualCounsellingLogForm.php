@@ -4,6 +4,7 @@ namespace App\Filament\Resources\IndividualCounsellingLogs\Schemas;
 
 use App\Models\Client;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -12,7 +13,6 @@ use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class IndividualCounsellingLogForm
 {
@@ -65,6 +65,7 @@ class IndividualCounsellingLogForm
                             ->required(),
                         DatePicker::make('session_date'),
                         TimePicker::make('start_time')
+                            ->seconds(false)
                             ->label('Time'),
                         TextInput::make('duration_hours')
                             ->label('Duration (hours)')
@@ -72,15 +73,16 @@ class IndividualCounsellingLogForm
                             ->step(0.25),
                         TextInput::make('place')
                             ->label('Place / Organization'),
-                        TextInput::make('session_number')
+                        Radio::make('session_number')
                             ->label('Session no.')
-                            ->numeric(),
+                            ->options([
+                                '1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5',
+                                '6' => '6', '7' => '7', '8' => '8', '9' => '9',
+                            ])
+                            ->inline(),
                     ]),
                 ])
-                ->columnSpanFull(),
-
-
-
+                    ->columnSpanFull(),
             ]);
     }
 }

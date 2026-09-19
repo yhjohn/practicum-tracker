@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\IndividualCounsellingLogs\Pages;
 
 use App\Filament\Resources\IndividualCounsellingLogs\IndividualCounsellingLogResource;
+use App\Filament\Resources\IndividualCounsellingLogs\Widgets\IndividualCounsellingLogsOverview;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListIndividualCounsellingLogs extends ListRecords
     {
         return [
             CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            IndividualCounsellingLogsOverview::class,
         ];
     }
 }
