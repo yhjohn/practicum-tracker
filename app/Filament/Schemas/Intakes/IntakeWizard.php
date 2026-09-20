@@ -34,7 +34,7 @@ class IntakeWizard
     /**
      * @return array<Step>
      */
-    protected static function baseSteps(): array
+    public static function baseSteps(): array
     {
         return [
             Step::make('Personal Information')

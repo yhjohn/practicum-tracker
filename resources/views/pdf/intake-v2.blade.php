@@ -11,6 +11,8 @@
         table.fields { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         table.fields td { padding: 4px 0; vertical-align: top; }
         table.fields td.label { width: 260px; font-weight: bold; }
+        .signature-box { border: 1px solid #d1d5db; padding: 8px; margin-top: 6px; }
+        .signature-box img { height: 80px; }
     </style>
 </head>
 <body>
@@ -27,6 +29,7 @@
         <tr><td class="label">Age</td><td>{{ $joined($intake->age) }}</td></tr>
         <tr><td class="label">Phone</td><td>{{ $joined($intake->phone) }}</td></tr>
         <tr><td class="label">Email</td><td>{{ $joined($intake->email) }}</td></tr>
+        <tr><td class="label">Address</td><td>{!! nl2br(e($joined($intake->address))) !!}</td></tr>
         <tr><td class="label">Relationship status</td><td>{{ $joined($intake->marital) }}</td></tr>
         <tr><td class="label">Occupation</td><td>{{ $joined($intake->occupation) }}</td></tr>
         <tr><td class="label">Sex</td><td>{{ $joined($intake->sex) }}</td></tr>
@@ -90,6 +93,18 @@
     <h2>Confidentiality Acknowledgement</h2>
     <p>My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.</p>
     <table class="fields">
+        <tr>
+            <td class="label">Signature</td>
+            <td>
+                <div class="signature-box">
+                    @if ($intake->signature)
+                        <img src="{{ $intake->signature }}" alt="Signature">
+                    @else
+                        Not signed
+                    @endif
+                </div>
+            </td>
+        </tr>
         <tr><td class="label">Date signed</td><td>{{ optional($intake->signature_date)->format('d M Y') ?? '—' }}</td></tr>
         <tr><td class="label">Submitted at</td><td>{{ optional($intake->submitted_at)->format('d M Y, H:i') ?? '—' }}</td></tr>
     </table>

@@ -30,6 +30,8 @@ class IntakeV2Factory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => IntakeStatus::Submitted,
+            'signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+            'signature_date' => now()->toDateString(),
             'submitted_at' => now(),
         ]);
     }

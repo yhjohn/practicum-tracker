@@ -26,6 +26,7 @@ class IntakeSummaryV2
                     TextEntry::make("{$prefix}age"),
                     TextEntry::make("{$prefix}phone"),
                     TextEntry::make("{$prefix}email"),
+                    TextEntry::make("{$prefix}address"),
                     TextEntry::make("{$prefix}marital")->label('Relationship status'),
                     TextEntry::make("{$prefix}occupation"),
                     TextEntry::make("{$prefix}sex"),

@@ -176,7 +176,7 @@ class PublicIntakeFormV2 extends Component implements HasActions, HasSchemas
     private function intakeAttributes(): array
     {
         return $this->intake->only([
-            'name', 'age', 'phone', 'email', 'occupation', 'sex',
+            'name', 'age', 'phone', 'email', 'address', 'occupation', 'sex',
             'emergency_name', 'emergency_relationship', 'emergency_phone',
             'marital',
             'education_level', 'education_level_other', 'job_satisfaction',
@@ -197,7 +197,7 @@ class PublicIntakeFormV2 extends Component implements HasActions, HasSchemas
             'harm_thoughts', 'harm_thoughts_response',
             'current_stressors', 'current_stressors_other', 'current_stressors_impact',
             'main_concern', 'counselling_goals', 'counselling_goals_other',
-            'anything_else',
+            'anything_else', 'signature',
         ]);
     }
 

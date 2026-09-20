@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\IntakeStatus;
 use App\Enums\IntakeVersion;
+use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ViewClient;
 use App\Livewire\PublicClientPortal;
 use App\Livewire\PublicIntakeFormV2;
 use App\Models\Client;
+use App\Models\Intake;
 use App\Models\IntakeV2;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +22,8 @@ use Tests\TestCase;
 class IntakeV2FormTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const SIGNATURE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
     public function test_new_clients_default_to_intake_version_v2(): void
     {
@@ -168,6 +172,8 @@ class IntakeV2FormTest extends TestCase
         $testable->fillForm([
             'emergency_name' => 'Jane Doe',
             'emergency_phone' => '555-0100',
+            'address' => "1 Jalan Test\nKuala Lumpur",
+            'signature' => self::SIGNATURE,
         ])
             ->call('submit')
             ->assertHasNoFormErrors();
@@ -179,6 +185,22 @@ class IntakeV2FormTest extends TestCase
         $this->assertNotNull($intake->submitted_at);
         $this->assertSame('Jane Doe', $client->emergency_contact);
         $this->assertSame('555-0100', $client->emergency_contact_phone);
+        $this->assertSame("1 Jalan Test\nKuala Lumpur", $intake->address);
+        $this->assertSame(self::SIGNATURE, $intake->signature);
+        $this->assertNotNull($intake->signature_date);
+    }
+
+    public function test_submitting_intake_without_a_signature_fails_validation(): void
+    {
+        $intake = IntakeV2::factory()->withAccessCode('123456')->create();
+
+        $testable = Livewire::test(PublicIntakeFormV2::class, ['intake' => $intake]);
+        $this->unlockForm($testable);
+
+        $testable->call('submit')
+            ->assertHasFormErrors(['signature' => 'required']);
+
+        $this->assertSame(IntakeStatus::Pending, $intake->refresh()->status);
     }
 
     public function test_submitting_intake_does_not_overwrite_existing_client_fields(): void
@@ -191,6 +213,7 @@ class IntakeV2FormTest extends TestCase
 
         $testable->fillForm([
             'emergency_name' => 'New Contact',
+            'signature' => self::SIGNATURE,
         ])
             ->call('submit')
             ->assertHasNoFormErrors();
@@ -218,6 +241,56 @@ class IntakeV2FormTest extends TestCase
         Livewire::test(ViewClient::class, ['record' => $client->getRouteKey()])
             ->assertOk()
             ->assertSee('Feeling overwhelmed at work.');
+    }
+
+    public function test_admin_can_edit_intake_v2_from_the_client_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $client = Client::factory()->create();
+        $intake = IntakeV2::factory()->for($client)->submitted()->create(['address' => 'Old address']);
+
+        Livewire::test(EditClient::class, ['record' => $client->getRouteKey()])
+            ->fillForm(['intakeV2' => ['address' => 'New address', 'main_concern' => 'Edited concern']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $intake->refresh();
+
+        $this->assertSame('New address', $intake->address);
+        $this->assertSame('Edited concern', $intake->main_concern);
+        $this->assertSame(self::SIGNATURE, $intake->signature);
+    }
+
+    public function test_admin_can_edit_intake_v1_from_the_client_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $client = Client::factory()->create();
+        $intake = Intake::factory()->for($client)->submitted()->create(['main_concern' => 'Old concern']);
+
+        Livewire::test(EditClient::class, ['record' => $client->getRouteKey()])
+            ->fillForm(['intake' => ['main_concern' => 'Edited V1 concern']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('Edited V1 concern', $intake->refresh()->main_concern);
+    }
+
+    public function test_client_edit_page_does_not_create_an_intake_v2_when_none_exists(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $client = Client::factory()->create();
+
+        Livewire::test(EditClient::class, ['record' => $client->getRouteKey()])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $client->refresh();
+
+        $this->assertNull($client->intakeV2);
+        $this->assertNull($client->intake);
     }
 
     private function unlockForm(Testable $testable): void

@@ -6,6 +6,7 @@ use App\Filament\Resources\Clients\Pages\ViewClient;
 use App\Models\Client;
 use App\Models\Consent;
 use App\Models\Intake;
+use App\Models\IntakeV2;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -76,5 +77,16 @@ class ClientPdfDownloadTest extends TestCase
         $pdf = Pdf::loadView('pdf.intake', ['intake' => $intake])->output();
 
         $this->assertStringStartsWith('%PDF', $pdf);
+    }
+
+    public function test_intake_v2_pdf_template_renders_address_and_signature(): void
+    {
+        $intake = IntakeV2::factory()->submitted()->create(['address' => '1 Jalan Test']);
+
+        $html = view('pdf.intake-v2', ['intake' => $intake])->render();
+
+        $this->assertStringContainsString('1 Jalan Test', $html);
+        $this->assertStringContainsString($intake->signature, $html);
+        $this->assertStringStartsWith('%PDF', Pdf::loadView('pdf.intake-v2', ['intake' => $intake])->output());
     }
 }

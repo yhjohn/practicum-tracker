@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
+use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class IntakeWizardV2
 {
@@ -34,7 +35,7 @@ class IntakeWizardV2
     /**
      * @return array<Step>
      */
-    protected static function baseSteps(): array
+    public static function baseSteps(): array
     {
         return [
             Step::make('Personal Information')
@@ -43,6 +44,7 @@ class IntakeWizardV2
                     TextInput::make('age')->numeric()->minValue(0)->maxValue(120),
                     TextInput::make('phone')->tel()->prefix('+60 '),
                     TextInput::make('email')->email(),
+                    Textarea::make('address'),
                     Radio::make('marital')
                         ->inline()
                         ->label('Relationship status')
@@ -451,9 +453,17 @@ class IntakeWizardV2
             ->schema([
                 ...IntakeSummaryV2::sections(),
 
-                Section::make('Confidentiality Acknowledgement')
+                Section::make('Confidentiality Acknowledgement and Signature')
                     ->description('My counsellor has explained the purpose of this intake form and the confidentiality of information shared, including its limits. I understand that I may ask questions about these matters.')
-                    ->schema([]),
+                    ->schema([
+                        SignaturePad::make('signature')
+                            ->backgroundColor('#ffffff')
+                            ->backgroundColorOnDark('#ffffff')
+                            ->penColor('#000')
+                            ->penColorOnDark('#000')
+                            ->label('Client signature')
+                            ->required(),
+                    ]),
             ]);
     }
 }
