@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\GroupCounsellingLogs\Pages\CreateGroupCounsellingLog;
 use App\Filament\Resources\GroupCounsellingLogs\Pages\ViewGroupCounsellingLog;
+use App\Filament\Widgets\ClientStatsOverview;
 use App\Models\Client;
 use App\Models\Group;
 use App\Models\GroupCounsellingLog;
@@ -130,5 +131,17 @@ class GroupCounsellingLogTest extends TestCase
         Livewire::test(ViewGroupCounsellingLog::class, ['record' => $log->getRouteKey()])
             ->callAction('downloadDocx')
             ->assertHasNoActionErrors();
+    }
+
+    public function test_dashboard_shows_total_group_counselling_hours(): void
+    {
+        $this->actingAs(User::factory()->create());
+        GroupCounsellingLog::factory()->create(['duration_hours' => 1.5]);
+        GroupCounsellingLog::factory()->create(['duration_hours' => 2]);
+
+        Livewire::test(ClientStatsOverview::class)
+            ->assertSee('Group counselling hours')
+            ->assertSee('3.5 / 50')
+            ->assertSee('46.5 h to go');
     }
 }

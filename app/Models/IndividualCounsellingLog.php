@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPracticumWeek;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IndividualCounsellingLog extends Model
 {
+    use HasPracticumWeek;
+
     protected $guarded = [];
 
     protected $casts = [

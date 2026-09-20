@@ -22,6 +22,8 @@ class GroupCounsellingLogsTable
                     ->date()
                     ->sortable()
                     ->placeholder('-'),
+                TextColumn::make('week')
+                    ->formatStateUsing(fn (?int $state): string => $state === null ? '-' : "Week {$state}"),
                 TextColumn::make('session_number')
                     ->label('Session no.')
                     ->placeholder('-'),

@@ -3,13 +3,18 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Client;
+use App\Models\GroupCounsellingLog;
 use App\Models\IndividualCounsellingLog;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ClientStatsOverview extends StatsOverviewWidget
 {
     private const TARGET_INDIVIDUAL_HOURS = 70;
+
+    private const TARGET_GROUP_HOURS = 50;
 
     /**
      * @return array<int, Stat>
@@ -19,12 +24,26 @@ class ClientStatsOverview extends StatsOverviewWidget
         return [
             Stat::make('Clients', Client::count()),
             $this->individualHoursStat(),
+            $this->groupHoursStat(),
         ];
     }
 
     private function individualHoursStat(): Stat
     {
-        $hoursPerSession = IndividualCounsellingLog::query()
+        return $this->hoursStat('Individual counselling hours', IndividualCounsellingLog::query(), self::TARGET_INDIVIDUAL_HOURS);
+    }
+
+    private function groupHoursStat(): Stat
+    {
+        return $this->hoursStat('Group counselling hours', GroupCounsellingLog::query(), self::TARGET_GROUP_HOURS);
+    }
+
+    /**
+     * @param  Builder<Model>  $logs
+     */
+    private function hoursStat(string $label, Builder $logs, int $target): Stat
+    {
+        $hoursPerSession = $logs
             ->whereNotNull('duration_hours')
             ->orderBy('session_date')
             ->orderBy('id')
@@ -32,8 +51,6 @@ class ClientStatsOverview extends StatsOverviewWidget
             ->map(fn (mixed $hours): float => (float) $hours);
 
         $total = $hoursPerSession->sum();
-        $remaining = max(self::TARGET_INDIVIDUAL_HOURS - $total, 0);
-        $percent = min(round($total / self::TARGET_INDIVIDUAL_HOURS * 100), 100);
 
         $runningTotal = 0.0;
         $cumulative = $hoursPerSession
@@ -42,7 +59,12 @@ class ClientStatsOverview extends StatsOverviewWidget
             })
             ->all();
 
-        return Stat::make('Individual counselling hours', rtrim(rtrim(number_format($total, 2), '0'), '.').' / '.self::TARGET_INDIVIDUAL_HOURS)
+        $formattedTotal = rtrim(rtrim(number_format($total, 2), '0'), '.');
+
+        $remaining = max($target - $total, 0);
+        $percent = min(round($total / $target * 100), 100);
+
+        return Stat::make($label, "{$formattedTotal} / {$target}")
             ->description($remaining > 0
                 ? rtrim(rtrim(number_format($remaining, 2), '0'), '.')." h to go ({$percent}%)"
                 : 'Target reached')

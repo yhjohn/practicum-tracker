@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPracticumWeek;
 use Database\Factories\GroupCounsellingLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,8 @@ class GroupCounsellingLog extends Model
 {
     /** @use HasFactory<GroupCounsellingLogFactory> */
     use HasFactory;
+
+    use HasPracticumWeek;
 
     protected $guarded = [];
 
