@@ -18,6 +18,9 @@ class IndividualCounsellingLogInfolist
                 TextEntry::make('session_date')
                     ->date()
                     ->placeholder('-'),
+                TextEntry::make('week')
+                    ->formatStateUsing(fn (?int $state): ?string => $state === null ? null : "Week {$state}")
+                    ->placeholder('-'),
                 TextEntry::make('start_time')
                     ->time()
                     ->placeholder('-'),
