@@ -78,7 +78,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
      * paragraph/line breaks become "\n" (PhpWord's setValue() turns those
      * into <w:br/> automatically) and every other tag is stripped.
      */
-    protected static function htmlToPlainText(?string $html): string
+    public static function htmlToPlainText(?string $html): string
     {
         if (blank($html)) {
             return '';
