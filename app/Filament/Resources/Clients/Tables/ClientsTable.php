@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\Clients\Tables;
 
-use App\Filament\Resources\CounsellingSessions\CounsellingSessionResource;
-use App\Models\Client;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -46,12 +43,6 @@ class ClientsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
-                Action::make('createSession')
-                    ->label('Create session')
-                    ->url(fn (Client $record): string => CounsellingSessionResource::getUrl('create', [
-                        'type' => 'individual',
-                        'client_id' => $record->id,
-                    ])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

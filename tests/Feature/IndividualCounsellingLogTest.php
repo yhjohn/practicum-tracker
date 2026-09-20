@@ -10,6 +10,8 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -85,6 +87,26 @@ class IndividualCounsellingLogTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertNull(IndividualCounsellingLog::firstOrFail()->written_at);
+    }
+
+    public function test_creating_a_log_stores_uploaded_attachments(): void
+    {
+        Storage::fake(config('filament.default_filesystem_disk'));
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(CreateIndividualCounsellingLog::class)
+            ->fillForm([
+                'client_id' => $client->id,
+                'attachments' => [UploadedFile::fake()->create('notes.pdf', 10, 'application/pdf')],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $attachments = IndividualCounsellingLog::firstOrFail()->attachments;
+
+        $this->assertCount(1, $attachments);
+        Storage::disk(config('filament.default_filesystem_disk'))->assertExists($attachments[0]);
     }
 
     public function test_random_written_at_always_respects_its_constraints(): void

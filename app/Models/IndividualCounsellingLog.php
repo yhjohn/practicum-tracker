@@ -14,6 +14,7 @@ class IndividualCounsellingLog extends Model
         'session_date' => 'date',
         'start_time' => 'datetime:H:i',
         'written_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     public function client(): BelongsTo

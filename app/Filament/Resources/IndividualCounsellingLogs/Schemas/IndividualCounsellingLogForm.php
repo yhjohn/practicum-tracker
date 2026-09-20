@@ -4,6 +4,7 @@ namespace App\Filament\Resources\IndividualCounsellingLogs\Schemas;
 
 use App\Models\Client;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -80,6 +81,12 @@ class IndividualCounsellingLogForm
                                 '6' => '6', '7' => '7', '8' => '8', '9' => '9',
                             ])
                             ->inline(),
+                        FileUpload::make('attachments')
+                            ->multiple()
+                            ->directory('individual-counselling-logs')
+                            ->visibility('private')
+                            ->downloadable()
+                            ->openable(),
                     ]),
                 ])
                     ->columnSpanFull(),

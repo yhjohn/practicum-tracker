@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\IndividualCounsellingLogs\Schemas;
 
+use App\Models\IndividualCounsellingLog;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class IndividualCounsellingLogInfolist
 {
@@ -45,6 +47,14 @@ class IndividualCounsellingLogInfolist
                     ->columnSpanFull(),
                 TextEntry::make('part4_evaluation')
                     ->label('Part 4: Evaluation of Counseling Session')
+                    ->html()
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+
+                TextEntry::make('attachments')
+                    ->state(fn (IndividualCounsellingLog $record): string => collect($record->attachments)
+                        ->map(fn (string $path): string => '<a href="'.e(Storage::disk(config('filament.default_filesystem_disk'))->temporaryUrl($path, now()->addMinutes(10))).'" target="_blank" class="text-primary-600 underline">'.e(basename($path)).'</a>')
+                        ->implode('<br>'))
                     ->html()
                     ->placeholder('-')
                     ->columnSpanFull(),
