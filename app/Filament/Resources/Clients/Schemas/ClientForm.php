@@ -27,7 +27,6 @@ class ClientForm
                     ->tel()
                     ->prefix('+60 ')
                     ->required(),
-                DatePicker::make('dob'),
                 TextInput::make('emergency_contact')
                     ->default(null),
                 TextInput::make('emergency_contact_phone')
