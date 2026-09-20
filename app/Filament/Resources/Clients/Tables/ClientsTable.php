@@ -31,11 +31,9 @@ class ClientsTable
                             : $record->intakeV2?->signature_date))
                     ->boolean(),
                 IconColumn::make('consent.signature')
-                ->label('Consent')
-                    ->state(fn($record) => filled($record->consent->signature))
-                ->boolean()
-
-
+                    ->label('Consent')
+                    ->state(fn($record) => filled($record->consent?->signature))
+                    ->boolean(),
             ])
             ->filters([
                 //
