@@ -25,14 +25,14 @@ class ClientsTable
                     ->searchable(),
                 IconColumn::make('intakes')
                     ->label('Intake Form')
-                    ->state(fn($record) => filled(
+                    ->state(fn ($record) => filled(
                         $record->intake_version === 'v1'
                             ? $record->intake?->signature_date
                             : $record->intakeV2?->signature_date))
                     ->boolean(),
                 IconColumn::make('consent.signature')
                     ->label('Consent')
-                    ->state(fn($record) => filled($record->consent?->signature))
+                    ->state(fn ($record) => filled($record->consent?->signature))
                     ->boolean(),
             ])
             ->filters([

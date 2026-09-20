@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Clients\Schemas;
 use App\Filament\Schemas\Intakes\IntakeWizard;
 use App\Filament\Schemas\Intakes\IntakeWizardV2;
 use App\Models\Client;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
