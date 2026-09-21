@@ -1,0 +1,11 @@
+name: smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker-ps:
+    runs-on: docker
+    steps:
+      - run: uname -a && whoami
+      - run: docker ps
