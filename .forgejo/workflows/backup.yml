@@ -1,0 +1,14 @@
+name: db-backup
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: synology
+    steps:
+      - run: >
+          docker exec practicum_mysql sh -c 'mysqldump --single-transaction -u root -p"$MYSQL_ROOT_PASSWORD" laravel_db'
+          > /volume1/docker/practicum-tracker/mysql_$(date +%Y%m%d-%H%M%S).sql
