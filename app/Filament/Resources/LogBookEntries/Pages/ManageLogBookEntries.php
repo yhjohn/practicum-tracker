@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Filament\Resources\LogBookEntries\Pages;
+
+use App\Exports\LogBookExport;
+use App\Filament\Resources\LogBookEntries\LogBookEntryResource;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ManageRecords;
+use Maatwebsite\Excel\Facades\Excel;
+use ToneGabes\Filament\Icons\Enums\Phosphor;
+
+class ManageLogBookEntries extends ManageRecords
+{
+    protected static string $resource = LogBookEntryResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('exportXlsx')
+                ->label('Export XLSX')
+                ->icon(Phosphor::FileXls)
+                ->color('gray')
+                ->action(function () {
+                    $export = new LogBookExport;
+
+                    foreach ($export->warnings() as $warning) {
+                        Notification::make()->warning()->title('Log book export')->body($warning)->persistent()->send();
+                    }
+
+                    return Excel::download($export, 'practicum-log-book.xlsx');
+                }),
+            CreateAction::make()
+                ->label('Add activity')
+                ->modalHeading('Add activity'),
+        ];
+    }
+}

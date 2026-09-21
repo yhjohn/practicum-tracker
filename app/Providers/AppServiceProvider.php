@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Client;
 use App\Models\Group;
+use App\Models\GroupCounsellingLog;
+use App\Models\IndividualCounsellingLog;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -28,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'client' => Client::class,
             'group' => Group::class,
+            'individual_counselling_log' => IndividualCounsellingLog::class,
+            'group_counselling_log' => GroupCounsellingLog::class,
         ]);
 
         URL::forceScheme('https');
