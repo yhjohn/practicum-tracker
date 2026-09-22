@@ -1,0 +1,10 @@
+services:
+  gotenberg:
+    container_name: ddev-${DDEV_SITENAME}-gotenberg
+    image: gotenberg/gotenberg:8
+    restart: "no"
+    expose:
+      - "3000"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
