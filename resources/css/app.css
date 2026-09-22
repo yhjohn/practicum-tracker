@@ -57,3 +57,12 @@
         @apply font-bold;
     }
 }
+
+/* // mse */
+.mse-items .fi-in-entry-label-col {
+        @apply bg-indigo-700! rounded p-3;
+    .fi-in-entry-label {
+        @apply text-white!
+    }
+
+}
