@@ -15,4 +15,10 @@ jobs:
           docker exec practicum_mysql sh -c 'mysqldump --single-transaction -u root -p"$MYSQL_ROOT_PASSWORD" laravel_db' \
             | docker run --rm -i -v /volume1/docker/practicum-tracker:/backup mysql:8.0 \
                 sh -c 'cat > /backup/mysql_'"$(TZ=UTC-8 date +%Y%m%d-%H%M%S)"'.sql'
-      - run: docker exec practicum_app git -C /var/www/html pull
+      # /volume1/docker/practicum-tracker is bind-mounted into practicum_app at /var/www/html,
+      # so pull from inside that container rather than the runner host.
+      - run: |
+          docker exec practicum_app sh -c '
+            git config --global --add safe.directory /var/www/html &&
+            git -C /var/www/html pull
+          '
