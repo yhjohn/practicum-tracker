@@ -10,4 +10,4 @@ RUN install-php-extensions intl bcmath gd
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 
 # Drop back to our unprivileged user
-USER www-data/
+USER www-data
