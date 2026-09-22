@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\IOFactory;
@@ -158,6 +159,8 @@ class IndividualCounsellingLogTest extends TestCase
 
     public function test_download_pdf_action_is_visible_and_callable(): void
     {
+        Http::fake(['*/forms/libreoffice/convert' => Http::response('%PDF-fake')]);
+
         $this->actingAs(User::factory()->create());
         $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
 

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\IndividualCounsellingLogs\Pages;
 
+use App\Filament\Concerns\ExportsReportDocx;
 use App\Filament\Resources\IndividualCounsellingLogs\IndividualCounsellingLogResource;
 use App\Models\IndividualCounsellingLog;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
@@ -14,6 +14,8 @@ use ToneGabes\Filament\Icons\Enums\Phosphor;
 
 class ViewIndividualCounsellingLog extends ViewRecord
 {
+    use ExportsReportDocx;
+
     protected static string $resource = IndividualCounsellingLogResource::class;
 
     protected function getHeaderActions(): array
@@ -22,10 +24,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
             Action::make('downloadPdf')
                 ->label('Download report PDF')
                 ->icon(Phosphor::FileArrowDown)
-                ->action(fn (IndividualCounsellingLog $record) => response()->streamDownload(
-                    fn () => print (Pdf::loadView('pdf.individual-counselling-log', ['log' => $record])->output()),
-                    "individual-counselling-report-{$record->client?->name}-{$record->id}.pdf",
-                )),
+                ->action(fn (IndividualCounsellingLog $record) => static::downloadPdf($record)),
             Action::make('downloadDocx')
                 ->label('Download report DOCX')
                 ->icon(Phosphor::FileArrowDown)
@@ -35,6 +34,44 @@ class ViewIndividualCounsellingLog extends ViewRecord
     }
 
     protected static function downloadDocx(IndividualCounsellingLog $record): mixed
+    {
+        $path = static::generateDocx($record);
+
+        if (! $path) {
+            return null;
+        }
+
+        return response()->download(
+            $path,
+            "individual-counselling-report-{$record->client?->name}-{$record->id}.docx",
+        );
+    }
+
+    protected static function downloadPdf(IndividualCounsellingLog $record): mixed
+    {
+        $docxPath = static::generateDocx($record);
+
+        if (! $docxPath) {
+            return null;
+        }
+
+        $pdf = static::convertDocxToPdf($docxPath);
+
+        if (! $pdf) {
+            return null;
+        }
+
+        return response()->streamDownload(
+            fn () => print ($pdf),
+            "individual-counselling-report-{$record->client?->name}-{$record->id}.pdf",
+        );
+    }
+
+    /**
+     * Rebuilds and stores the DOCX from the template, always fresh, at a
+     * path keyed by the record id so repeat exports reuse the same file.
+     */
+    protected static function generateDocx(IndividualCounsellingLog $record): ?string
     {
         $templatePath = resource_path('templates/individual-counselling-log.docx');
 
@@ -66,13 +103,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
         static::fillSignature($processor);
 
-        $tempPath = tempnam(sys_get_temp_dir(), 'icl_').'.docx';
-        $processor->saveAs($tempPath);
-
-        return response()->download(
-            $tempPath,
-            "individual-counselling-report-{$record->client?->name}-{$record->id}.docx",
-        )->deleteFileAfterSend();
+        return static::storeDocx($processor, "individual-counselling-log-{$record->id}");
     }
 
     public static function fillSignature(TemplateProcessor $processor): void

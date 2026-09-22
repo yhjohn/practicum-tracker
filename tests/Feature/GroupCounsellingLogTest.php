@@ -14,6 +14,7 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -115,7 +116,7 @@ class GroupCounsellingLogTest extends TestCase
 
         $row = $log->memberRows()->first();
 
-        $this->assertSame('Jane', $row['name']);
+        $this->assertSame('Jane (J01)', $row['name']);
         $this->assertSame('Female', $row['gender']);
         $this->assertSame('24', $row['age']);
         $this->assertSame('High', $row['participation']);
@@ -124,12 +125,12 @@ class GroupCounsellingLogTest extends TestCase
     public function test_member_rows_append_the_client_code_to_the_name(): void
     {
         $client = Client::factory()->create(['name' => 'Jane', 'client_code' => 'J01']);
-        $withoutCode = Client::factory()->create(['name' => 'Ben', 'client_code' => null]);
+        $autoCoded = Client::factory()->create(['name' => 'Ben']);
         $log = GroupCounsellingLog::factory()->create([
-            'members' => [['client_id' => $client->id], ['client_id' => $withoutCode->id]],
+            'members' => [['client_id' => $client->id], ['client_id' => $autoCoded->id]],
         ]);
 
-        $this->assertSame(['Jane (J01)', 'Ben'], $log->memberRows()->pluck('name')->all());
+        $this->assertSame(['Jane (J01)', 'Ben (B02)'], $log->memberRows()->pluck('name')->all());
     }
 
     public function test_pdf_template_renders_with_and_without_members(): void
@@ -145,6 +146,8 @@ class GroupCounsellingLogTest extends TestCase
 
     public function test_download_actions_work_for_a_log_with_members(): void
     {
+        Http::fake(['*/forms/libreoffice/convert' => Http::response('%PDF-fake')]);
+
         $this->actingAs(User::factory()->create());
         $client = Client::factory()->create(['name' => 'Jane Client']);
         $log = GroupCounsellingLog::factory()->create([
