@@ -14,4 +14,8 @@ jobs:
       - run: |
           docker exec practicum_mysql sh -c 'mysqldump --single-transaction -u root -p"$MYSQL_ROOT_PASSWORD" laravel_db' \
             | docker run --rm -i -v /volume1/docker/practicum-tracker:/backup mysql:8.0 \
-                sh -c 'cat > /backup/mysql_'"$(date +%Y%m%d-%H%M%S)"'.sql'
+                sh -c 'cat > /backup/mysql_'"$(TZ=UTC-8 date +%Y%m%d-%H%M%S)"'.sql'
+      # nsenter drops into host's namespaces, so host's own git binary runs.
+      - run: |
+          docker run --rm --privileged --pid=host justincormack/nsenter1 \
+            sh -c 'cd /volume1/docker/practicum-tracker && git pull'

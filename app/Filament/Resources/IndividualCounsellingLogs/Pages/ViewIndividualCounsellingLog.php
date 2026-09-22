@@ -51,7 +51,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
         $processor = new TemplateProcessor($templatePath);
 
         $processor->setValues([
-            'client_name' => $record->client?->name ?? '',
+            'client_name' => $record->client?->name_with_code ?? '',
             'session_date' => optional($record->session_date)->format('d M Y') ?? '',
             'session_number' => (string) ($record->session_number ?? ''),
             'time' => optional($record->start_time)->format('H:i') ?? '',
@@ -64,6 +64,8 @@ class ViewIndividualCounsellingLog extends ViewRecord
             'written_at' => optional($record->written_at)->format('d/m/Y H:i') ?? '',
         ]);
 
+        static::fillSignature($processor);
+
         $tempPath = tempnam(sys_get_temp_dir(), 'icl_').'.docx';
         $processor->saveAs($tempPath);
 
@@ -71,6 +73,19 @@ class ViewIndividualCounsellingLog extends ViewRecord
             $tempPath,
             "individual-counselling-report-{$record->client?->name}-{$record->id}.docx",
         )->deleteFileAfterSend();
+    }
+
+    public static function fillSignature(TemplateProcessor $processor): void
+    {
+        $path = resource_path('templates/signature.png');
+
+        if (! is_file($path)) {
+            $processor->setValue('signature', '');
+
+            return;
+        }
+
+        $processor->setImageValue('signature', ['path' => $path, 'width' => 120, 'height' => 95]);
     }
 
     /**
