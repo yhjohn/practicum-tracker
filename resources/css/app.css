@@ -1,13 +1,11 @@
 @import 'tailwindcss';
 
-@import '../../vendor/filament/support/resources/css/index.css';
-@import '../../vendor/filament/actions/resources/css/index.css';
-@import '../../vendor/filament/forms/resources/css/index.css';
-@import '../../vendor/filament/notifications/resources/css/index.css';
-@import '../../vendor/filament/schemas/resources/css/index.css';
+@import '../../vendor/filament/filament/resources/css/theme.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../../app/Filament';
+@source '../../resources/views/filament';
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -45,5 +43,17 @@
 
     & .fi-sc-wizard-header-step-label {
         @apply text-base;
+    }
+}
+
+.invert-section {
+    .fi-section {
+        @apply bg-indigo-700! text-white!;
+    }
+    .fi-in-text-item, .fi-in-entry-label {
+        @apply text-white!;
+    }
+    .fi-in-entry-label {
+        @apply font-bold;
     }
 }
