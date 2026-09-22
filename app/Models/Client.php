@@ -50,6 +50,10 @@ class Client extends Model
             if (empty($client->intake_version)) {
                 $client->intake_version = IntakeVersion::V2;
             }
+
+            if (empty($client->client_code)) {
+                $client->client_code = Str::upper(Str::substr(trim((string) $client->name), 0, 1)).sprintf('%02d', static::count() + 1);
+            }
         });
     }
 
