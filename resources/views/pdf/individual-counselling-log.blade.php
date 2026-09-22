@@ -13,6 +13,8 @@
         table.header td.label { width: 140px; font-weight: bold; }
         .part-body { line-height: 1.5; }
         .part-body p { margin: 4px 0; }
+        .signature { margin-top: 24px; }
+        .signature td { padding: 6px 0; }
     </style>
 </head>
 <body>
@@ -22,7 +24,7 @@
     <table class="header">
         <tr>
             <td class="label">Client Name / Code</td>
-            <td>{{ $log->client?->name }}</td>
+            <td>{{ $log->client?->name_with_code }}</td>
             <td class="label">Date</td>
             <td>{{ optional($log->session_date)->format('d M Y') ?? '-' }}</td>
         </tr>
@@ -51,5 +53,10 @@
 
     <h2>Part 4: Evaluation of Counseling Session</h2>
     <div class="part-body">{!! $log->part4_evaluation ?: '<p>-</p>' !!}</div>
+
+    <table class="header signature">
+        <tr><td class="label">Signature</td><td>@include('pdf.signature')</td></tr>
+        <tr><td class="label">Date and Time</td><td>{{ optional($log->written_at)->format('d/m/Y H:i') }}</td></tr>
+    </table>
 </body>
 </html>

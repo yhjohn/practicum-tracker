@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\IntakeStatus;
 use App\Enums\IntakeVersion;
 use Database\Factories\ClientFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -50,6 +51,18 @@ class Client extends Model
                 $client->intake_version = IntakeVersion::V2;
             }
         });
+    }
+
+    /**
+     * Name with the client code appended, e.g. "John Tan (J01)", for exports.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function nameWithCode(): Attribute
+    {
+        return Attribute::get(fn (): string => filled($this->client_code)
+            ? "{$this->name} ({$this->client_code})"
+            : (string) $this->name);
     }
 
     public function groups(): BelongsToMany

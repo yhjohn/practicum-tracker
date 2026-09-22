@@ -100,6 +100,8 @@ class ViewGroupCounsellingLog extends ViewRecord
             }
         }
 
+        ViewIndividualCounsellingLog::fillSignature($processor);
+
         $tempPath = tempnam(sys_get_temp_dir(), 'gcl_').'.docx';
         $processor->saveAs($tempPath);
 
