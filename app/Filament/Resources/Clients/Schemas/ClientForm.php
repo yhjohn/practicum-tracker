@@ -19,7 +19,8 @@ class ClientForm
             ->components([
                 TextInput::make('client_code')
                     ->unique(ignoreRecord: true)
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->hiddenOn('create'),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('email')
