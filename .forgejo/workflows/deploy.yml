@@ -1,0 +1,32 @@
+name: db-backup
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: synology
+    steps:
+      # Job runs inside a container, so /volume1 is not visible here.
+      # Bind-mount via a helper container: docker resolves the path on the host.
+      - run: |
+          docker exec practicum_mysql sh -c 'mysqldump --single-transaction -u root -p"$MYSQL_ROOT_PASSWORD" laravel_db' \
+            | docker run --rm -i -v /volume1/docker/practicum-tracker:/backup mysql:8.0 \
+                sh -c 'cat > /backup/mysql_'"$(TZ=UTC-8 date +%Y%m%d-%H%M%S)"'.sql'
+      # /volume1/docker/practicum-tracker is bind-mounted into practicum_app at /var/www/html,
+      # so pull from inside that container rather than the runner host.
+      - run: |
+          docker exec practicum_app sh -c '
+            git config --global --add safe.directory /var/www/html &&
+            git -C /var/www/html pull
+          '
+      - run: |
+          docker exec practicum_app composer install --no-interaction --prefer-dist --optimize-autoloader
+      
+      - run: |
+          docker exec practicum_app php artisan migrate --force
+
+      - run: |
+          docker exec practicum_app php artisan optimize
