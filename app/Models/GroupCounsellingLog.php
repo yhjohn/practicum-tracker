@@ -57,8 +57,8 @@ class GroupCounsellingLog extends Model
             return [
                 'no' => $index + 1,
                 'name' => $client?->name_with_code ?? '',
-                'gender' => (string) ($client?->intakeV2?->sex ?? $client?->intake?->sex ?? ''),
-                'age' => (string) ($client?->intakeV2?->age ?? $client?->intake?->age ?? $client?->dob?->age ?? ''),
+                'gender' => (string) $client?->gender,
+                'age' => (string) $client?->age,
                 'attendance' => $attendance,
                 'participation' => (string) ($member['participation_level'] ?? ''),
                 'progress_notes' => (string) ($member['progress_notes'] ?? ''),

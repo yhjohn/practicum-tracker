@@ -69,6 +69,22 @@ class Client extends Model
             : (string) $this->name);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function gender(): Attribute
+    {
+        return Attribute::get(fn (): string => (string) ($this->intakeV2?->sex ?? $this->intake?->sex ?? ''));
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function age(): Attribute
+    {
+        return Attribute::get(fn (): string => (string) ($this->intakeV2?->age ?? $this->intake?->age ?? $this->dob?->age ?? ''));
+    }
+
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)
@@ -127,5 +143,10 @@ class Client extends Model
     public function consent(): HasOne
     {
         return $this->hasOne(Consent::class);
+    }
+
+    public function mse(): HasOne
+    {
+        return $this->hasOne(MentalStatusExamination::class);
     }
 }
