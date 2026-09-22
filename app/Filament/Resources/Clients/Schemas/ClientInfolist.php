@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Filament\Schemas\Intakes\IntakeSummary;
 use App\Filament\Schemas\Intakes\IntakeSummaryV2;
+use App\Filament\Schemas\Mse\MseSummary;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -76,6 +77,18 @@ class ClientInfolist
 
                         ...collect(IntakeSummary::sections('intake.'))
                             ->all(),
+                    ])
+                    ->columnSpanFull()
+                    ->collapsible(),
+
+                Section::make('Mental Status Examination')
+                    ->schema([
+                        TextEntry::make('mse.created_at')
+                            ->label('Recorded at')
+                            ->dateTime()
+                            ->placeholder('Not yet recorded'),
+
+                        ...array_slice(MseSummary::sections('mse.'), 1),
                     ])
                     ->columnSpanFull()
                     ->collapsible(),

@@ -23,9 +23,21 @@ class IndividualCounsellingLogTest extends TestCase
 {
     use RefreshDatabase;
 
+    private bool $touchedTemplate = false;
+
+    private ?string $originalTemplate = null;
+
     protected function tearDown(): void
     {
-        @unlink(resource_path('templates/individual-counselling-log.docx'));
+        if ($this->touchedTemplate) {
+            $path = resource_path('templates/individual-counselling-log.docx');
+
+            if ($this->originalTemplate !== null) {
+                file_put_contents($path, $this->originalTemplate);
+            } else {
+                @unlink($path);
+            }
+        }
 
         parent::tearDown();
     }
@@ -181,6 +193,8 @@ class IndividualCounsellingLogTest extends TestCase
 
     public function test_download_docx_action_notifies_when_template_is_missing(): void
     {
+        $this->hideTemplate();
+
         $this->actingAs(User::factory()->create());
         $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
 
@@ -215,14 +229,33 @@ class IndividualCounsellingLogTest extends TestCase
         $this->assertStringContainsString('Jane Client (J01)', $html);
     }
 
+    private function hideTemplate(): void
+    {
+        $this->touchedTemplate = true;
+
+        $path = resource_path('templates/individual-counselling-log.docx');
+
+        if (is_file($path)) {
+            $this->originalTemplate = file_get_contents($path);
+            unlink($path);
+        }
+    }
+
     private function writeFixtureTemplate(): void
     {
+        $this->touchedTemplate = true;
+
+        $path = resource_path('templates/individual-counselling-log.docx');
+
+        if (is_file($path) && $this->originalTemplate === null) {
+            $this->originalTemplate = file_get_contents($path);
+        }
+
         $phpWord = new PhpWord;
         $phpWord->addSection()->addText(
             '${client_name} ${session_date} ${session_number} ${time} ${duration} ${place} ${part1} ${part2} ${part3} ${part4}'
         );
 
-        $path = resource_path('templates/individual-counselling-log.docx');
         @mkdir(dirname($path), recursive: true);
 
         IOFactory::createWriter($phpWord, 'Word2007')->save($path);
