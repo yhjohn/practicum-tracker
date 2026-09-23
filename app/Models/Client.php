@@ -140,22 +140,6 @@ class Client extends Model
         ]);
     }
 
-    /**
-     * Gender as recorded on the client's intake, or an empty string.
-     */
-    public function gender(): string
-    {
-        return (string) ($this->intakeV2?->sex ?? $this->intake?->sex ?? '');
-    }
-
-    /**
-     * Age from the client's intake, falling back to their date of birth.
-     */
-    public function age(): string
-    {
-        return (string) ($this->intakeV2?->age ?? $this->intake?->age ?? $this->dob?->age ?? '');
-    }
-
     public function consent(): HasOne
     {
         return $this->hasOne(Consent::class);

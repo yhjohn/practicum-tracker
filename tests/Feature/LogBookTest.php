@@ -26,7 +26,7 @@ class LogBookTest extends TestCase
 
     public function test_individual_log_is_mirrored_into_the_log_book_and_kept_in_sync(): void
     {
-        $client = Client::factory()->create(['name' => 'Jane']);
+        $client = Client::factory()->create(['name' => 'Jane', 'client_code' => 'J01']);
         $log = IndividualCounsellingLog::create([
             'client_id' => $client->id,
             'session_date' => '2026-09-21',
@@ -38,7 +38,7 @@ class LogBookTest extends TestCase
         $entry = LogBookEntry::where('activity', LogBookActivity::IndividualCounselling)->sole();
 
         $this->assertSame(2, $entry->week);
-        $this->assertSame('Jane', $entry->client_code);
+        $this->assertSame('J01', $entry->client_code);
         $this->assertSame('09:00 – 10:30', $entry->timeRange());
         $this->assertFalse($entry->isManual());
 
@@ -165,7 +165,7 @@ class LogBookTest extends TestCase
     {
         Storage::fake('local');
         config(['practicum.student.name' => 'Student Name']);
-        $client = Client::factory()->create(['name' => 'Jane']);
+        $client = Client::factory()->create(['name' => 'Jane', 'client_code' => 'J01']);
         IndividualCounsellingLog::create([
             'client_id' => $client->id, 'session_date' => '2026-09-21', 'start_time' => '09:00', 'duration_hours' => 1.5,
         ]);
@@ -178,7 +178,7 @@ class LogBookTest extends TestCase
         $book = IOFactory::load(Storage::disk('local')->path('log.xlsx'));
 
         $this->assertSame('Student Name', $book->getSheetByName('COVER')->getCell('C7')->getValue());
-        $this->assertSame('Jane', $book->getSheetByName('CLIENT TRACKER')->getCell('B5')->getValue());
+        $this->assertSame('J01', $book->getSheetByName('CLIENT TRACKER')->getCell('B5')->getValue());
 
         $week1 = $book->getSheetByName('W01');
         $this->assertSame('Peer supervision', $week1->getCell('D5')->getValue());
@@ -189,6 +189,7 @@ class LogBookTest extends TestCase
         $week2 = $book->getSheetByName('W02');
         $this->assertSame('Individual counselling', $week2->getCell('D5')->getValue());
         $this->assertSame('09:00 – 10:30', $week2->getCell('C5')->getValue());
+        $this->assertSame('J01', $week2->getCell('F5')->getValue());
         $this->assertStringStartsWith('=SUMIF', $week2->getCell('G23')->getValue());
         $this->assertStringContainsString('W02', $book->getSheetByName('SUMMARY')->getCell('D8')->getValue());
     }

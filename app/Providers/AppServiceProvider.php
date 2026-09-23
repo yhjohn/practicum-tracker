@@ -41,5 +41,6 @@ class AppServiceProvider extends ServiceProvider
                 'primary' => Color::Blue,
             ]);
         }
+
     }
 }

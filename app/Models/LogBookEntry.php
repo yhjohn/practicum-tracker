@@ -69,7 +69,7 @@ class LogBookEntry extends Model
             ? [
                 'activity' => LogBookActivity::IndividualCounselling,
                 'description' => 'Individual counselling'.($log->session_number ? " – Session {$log->session_number}" : ''),
-                'client_code' => $log->client?->name,
+                'client_code' => $log->client?->client_code,
                 'number_of_clients' => 1,
             ]
             : [

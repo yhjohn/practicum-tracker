@@ -149,9 +149,9 @@ class LogBookExport implements Export, WithEvents, WithExportTemplate
             $sessions = $sessionsByClient->values()->get($slot);
             $client = $sessions ? $clients->get($sessions->first()->client_id) : null;
 
-            $sheet->setCellValue("B{$row}", $client?->name);
-            $sheet->setCellValue("C{$row}", $client?->age());
-            $sheet->setCellValue("D{$row}", $client?->gender());
+            $sheet->setCellValue("B{$row}", $client?->client_code);
+            $sheet->setCellValue("C{$row}", $client?->age);
+            $sheet->setCellValue("D{$row}", $client?->gender);
 
             foreach (range(0, self::TRACKER_SESSION_SLOTS - 1) as $sessionSlot) {
                 $sheet->setCellValue(
