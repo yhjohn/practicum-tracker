@@ -47,18 +47,11 @@ class LogBookExport implements Export, WithEvents, WithExportTemplate
     public function warnings(): array
     {
         $warnings = [];
-        $slots = self::LAST_ENTRY_ROW - self::FIRST_ENTRY_ROW + 1;
 
         $outOfRange = $this->entries()->filter(fn (LogBookEntry $entry): bool => $entry->week === null || $entry->week > config('practicum.weeks'));
 
         if ($outOfRange->isNotEmpty()) {
             $warnings[] = "{$outOfRange->count()} entries fall outside weeks 1–".config('practicum.weeks').' and were left out.';
-        }
-
-        foreach ($this->entries()->groupBy('week') as $week => $entries) {
-            if ($week !== '' && $week <= config('practicum.weeks') && $entries->count() > $slots) {
-                $warnings[] = "Week {$week} has {$entries->count()} entries but the template holds {$slots}; the extra ones (and their hours) were left out.";
-            }
         }
 
         return $warnings;
@@ -84,11 +77,38 @@ class LogBookExport implements Export, WithEvents, WithExportTemplate
         $byWeek = $this->entries()->groupBy('week');
 
         foreach (range(1, config('practicum.weeks')) as $week) {
-            $this->fillWeek(
+            $extraRows = $this->fillWeek(
                 $spreadsheet->getSheetByNameOrThrow(sprintf('W%02d', $week)),
                 $week,
                 $byWeek->get($week, collect()),
             );
+
+            $this->shiftSummaryReferences($spreadsheet->getSheetByNameOrThrow('SUMMARY'), sprintf('W%02d', $week), $extraRows);
+        }
+    }
+
+    /**
+     * PhpSpreadsheet only moves formulas on the sheet that grew, so point the
+     * SUMMARY's references to a week's totals at the rows they were pushed down to.
+     */
+    private function shiftSummaryReferences(Worksheet $summary, string $weekSheet, int $extraRows): void
+    {
+        if ($extraRows === 0) {
+            return;
+        }
+
+        foreach ($summary->getCellCollection()->getCoordinates() as $coordinate) {
+            $cell = $summary->getCell($coordinate);
+
+            if (! $cell->isFormula()) {
+                continue;
+            }
+
+            $cell->setValue(preg_replace_callback(
+                '/\''.$weekSheet.'\'!(\$?[A-Z]+\$?)(\d+)/',
+                fn (array $match): string => "'{$weekSheet}'!{$match[1]}".($match[2] >= self::LAST_ENTRY_ROW ? $match[2] + $extraRows : $match[2]),
+                $cell->getValue(),
+            ));
         }
     }
 
@@ -143,20 +163,30 @@ class LogBookExport implements Export, WithEvents, WithExportTemplate
     }
 
     /**
+     * The template has 15 entry rows; busier weeks get extra rows inserted inside
+     * that block, so the weekly totals stretch to cover them.
+     *
      * @param  Collection<int, LogBookEntry>  $entries
+     * @return int the number of rows inserted
      */
-    private function fillWeek(Worksheet $sheet, int $week, Collection $entries): void
+    private function fillWeek(Worksheet $sheet, int $week, Collection $entries): int
     {
         $from = LogBookEntry::weekStart($week);
 
         $sheet->setCellValue('F2', Date::PHPToExcel($from));
         $sheet->setCellValue('I2', Date::PHPToExcel($from->copy()->addDays(6)));
 
-        $rows = $entries->take(self::LAST_ENTRY_ROW - self::FIRST_ENTRY_ROW + 1)->values();
+        $rows = $entries->values();
+        $extraRows = max($rows->count() - (self::LAST_ENTRY_ROW - self::FIRST_ENTRY_ROW + 1), 0);
 
-        for ($row = self::FIRST_ENTRY_ROW; $row <= self::LAST_ENTRY_ROW; $row++) {
+        if ($extraRows > 0) {
+            $sheet->insertNewRowBefore(self::LAST_ENTRY_ROW, $extraRows);
+        }
+
+        for ($row = self::FIRST_ENTRY_ROW; $row <= self::LAST_ENTRY_ROW + $extraRows; $row++) {
             $entry = $rows->get($row - self::FIRST_ENTRY_ROW);
 
+            $sheet->setCellValue("A{$row}", $row - self::FIRST_ENTRY_ROW + 1);
             $sheet->setCellValue("B{$row}", $entry ? Date::PHPToExcel($entry->session_date) : null);
             $sheet->setCellValue("C{$row}", $entry?->timeRange());
             $sheet->setCellValue("D{$row}", $entry?->description);
@@ -166,6 +196,8 @@ class LogBookExport implements Export, WithEvents, WithExportTemplate
             $sheet->setCellValue("H{$row}", $entry ? (float) $entry->duration_hours : null);
             $sheet->setCellValue("I{$row}", $entry?->notes);
         }
+
+        return $extraRows;
     }
 
     /**

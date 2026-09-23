@@ -44,4 +44,28 @@ return [
         'site_address' => env('PRACTICUM_SITE_ADDRESS'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Progress Dashboard Targets
+    |--------------------------------------------------------------------------
+    |
+    | Required hours per component, matching the XLSX template's SUMMARY sheet
+    | "PROGRESS DASHBOARD" section. The three totals are the program's own
+    | minimums and are not simply the sum of the components above them.
+    |
+    */
+
+    'targets' => [
+        'individual_counselling' => 70,
+        'group_counselling' => 50,
+        'career_family_couple_counselling' => 0,
+        'professional_development' => 0,
+        'guidance_and_administration' => 141,
+        'supervision' => 0,
+        'face_to_face_seminar' => 15,
+        'direct_client_contact_total' => 96,
+        'other_activities_total' => 156,
+        'grand_total' => 252,
+    ],
+
 ];

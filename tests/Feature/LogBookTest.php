@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\LogBookActivity;
 use App\Exports\LogBookExport;
 use App\Filament\Resources\LogBookEntries\Pages\ManageLogBookEntries;
+use App\Filament\Widgets\PracticumProgressOverview;
 use App\Models\Client;
 use App\Models\Group;
 use App\Models\GroupCounsellingLog;
@@ -34,9 +35,8 @@ class LogBookTest extends TestCase
             'session_number' => 2,
         ]);
 
-        $entry = LogBookEntry::sole();
+        $entry = LogBookEntry::where('activity', LogBookActivity::IndividualCounselling)->sole();
 
-        $this->assertSame(LogBookActivity::IndividualCounselling, $entry->activity);
         $this->assertSame(2, $entry->week);
         $this->assertSame('Jane', $entry->client_code);
         $this->assertSame('09:00 – 10:30', $entry->timeRange());
@@ -44,13 +44,43 @@ class LogBookTest extends TestCase
 
         $log->update(['duration_hours' => 2, 'session_date' => '2026-09-13']);
 
-        $this->assertCount(1, LogBookEntry::all());
-        $this->assertSame(1, LogBookEntry::sole()->week);
-        $this->assertEquals(2, LogBookEntry::sole()->duration_hours);
+        $this->assertCount(2, LogBookEntry::all());
+        $this->assertSame(1, $entry->refresh()->week);
+        $this->assertEquals(2, $entry->duration_hours);
 
         $log->delete();
 
         $this->assertCount(0, LogBookEntry::all());
+    }
+
+    public function test_each_counselling_log_adds_one_hour_of_administration_at_the_same_time(): void
+    {
+        $individual = IndividualCounsellingLog::create([
+            'client_id' => Client::factory()->create(['name' => 'Jane'])->id,
+            'session_date' => '2026-09-21',
+            'start_time' => '09:00',
+            'duration_hours' => 1.5,
+        ]);
+        GroupCounsellingLog::factory()->create(['session_date' => '2026-09-22', 'start_time' => '14:00', 'duration_hours' => 2]);
+
+        $admin = LogBookEntry::where('activity', LogBookActivity::ManagementAndAdministration)->orderBy('session_date')->get();
+
+        $this->assertCount(2, $admin);
+        $this->assertSame('2026-09-21', $admin[0]->session_date->toDateString());
+        $this->assertSame('09:00 – 10:00', $admin[0]->timeRange());
+        $this->assertSame('Administration – Individual counselling', $admin[0]->description);
+        $this->assertSame('14:00 – 15:00', $admin[1]->timeRange());
+        $this->assertFalse($admin[0]->isManual());
+
+        $individual->update(['session_date' => '2026-09-23', 'start_time' => '10:00', 'duration_hours' => 3]);
+
+        $this->assertSame('10:00 – 11:00', $admin[0]->refresh()->timeRange());
+        $this->assertSame('2026-09-23', $admin[0]->session_date->toDateString());
+        $this->assertCount(4, LogBookEntry::all());
+
+        $individual->update(['session_date' => null]);
+
+        $this->assertCount(2, LogBookEntry::all());
     }
 
     public function test_log_without_a_session_date_has_no_log_book_entry(): void
@@ -70,9 +100,8 @@ class LogBookTest extends TestCase
             'members' => [['client_id' => 1, 'attended' => true], ['client_id' => 2, 'attended' => false]],
         ]);
 
-        $entry = LogBookEntry::sole();
+        $entry = LogBookEntry::where('activity', LogBookActivity::GroupCounselling)->sole();
 
-        $this->assertSame(LogBookActivity::GroupCounselling, $entry->activity);
         $this->assertSame('GRP-A', $entry->client_code);
         $this->assertSame(1, $entry->number_of_clients);
     }
@@ -122,7 +151,7 @@ class LogBookTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
         IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id, 'session_date' => '2026-09-15']);
-        $mirrored = LogBookEntry::sole();
+        $mirrored = LogBookEntry::first();
         $manual = LogBookEntry::factory()->create();
 
         Livewire::test(ManageLogBookEntries::class)
@@ -164,14 +193,73 @@ class LogBookTest extends TestCase
         $this->assertStringContainsString('W02', $book->getSheetByName('SUMMARY')->getCell('D8')->getValue());
     }
 
-    public function test_export_warns_about_entries_the_template_cannot_hold(): void
+    public function test_export_warns_about_entries_outside_the_practicum_weeks(): void
     {
-        LogBookEntry::factory()->count(16)->create(['session_date' => '2026-09-15']);
         LogBookEntry::factory()->create(['session_date' => '2026-09-01']);
 
-        $warnings = (new LogBookExport)->warnings();
+        $this->assertStringContainsString('1 entries fall outside', implode(' ', (new LogBookExport)->warnings()));
+    }
 
-        $this->assertCount(2, $warnings);
-        $this->assertStringContainsString('Week 1 has 16 entries', implode(' ', $warnings));
+    public function test_export_adds_rows_for_a_busy_week_and_keeps_the_totals_covering_them(): void
+    {
+        Storage::fake('local');
+        LogBookEntry::factory()->count(20)->create([
+            'session_date' => '2026-09-21', 'activity' => LogBookActivity::Supervision, 'duration_hours' => 1,
+        ]);
+
+        Excel::store(new LogBookExport, 'log.xlsx', 'local');
+
+        $book = IOFactory::load(Storage::disk('local')->path('log.xlsx'));
+        $week2 = $book->getSheetByName('W02');
+
+        $this->assertSame([], (new LogBookExport)->warnings());
+        $this->assertSame(20, $week2->getCell('A24')->getValue());
+        $this->assertSame('Supervision', $week2->getCell('E24')->getValue());
+        $this->assertNull($week2->getCell('E25')->getValue());
+        $this->assertSame('=SUMIF($E$5:$E$24,"Supervision",$H$5:$H$24)', $week2->getCell('G33')->getValue());
+        $this->assertEquals(20, $week2->getCell('G33')->getCalculatedValue());
+        $this->assertSame("='W02'!G33", $book->getSheetByName('SUMMARY')->getCell('I8')->getValue());
+        $this->assertSame('E5:E24', array_key_first($week2->getDataValidationCollection()));
+        $this->assertSame("='W01'!G28", $book->getSheetByName('SUMMARY')->getCell('I7')->getValue());
+    }
+
+    public function test_progress_summary_totals_hours_by_component_against_their_targets(): void
+    {
+        $client = Client::factory()->create();
+        IndividualCounsellingLog::create(['client_id' => $client->id, 'session_date' => '2026-09-15', 'duration_hours' => 70]);
+        LogBookEntry::factory()->create(['activity' => LogBookActivity::GuidanceActivities, 'duration_hours' => 5, 'session_date' => '2026-09-16']);
+
+        $summary = LogBookEntry::progressSummary()->keyBy('label');
+
+        $individual = $summary->get('Individual Counselling');
+        $this->assertSame(70, $individual['target']);
+        $this->assertEquals(70, $individual['completed']);
+        $this->assertEquals(0, $individual['remaining']);
+        $this->assertSame(100.0, $individual['percent']);
+        $this->assertSame('Complete', $individual['status']);
+
+        $guidance = $summary->get('Guidance & Administration');
+        $this->assertEquals(6, $guidance['completed']); // 5 guidance + 1h admin mirrored from the individual log
+        $this->assertSame('Below Target', $guidance['status']);
+
+        $career = $summary->get('Career / Family / Couple Counselling');
+        $this->assertSame(0, $career['target']);
+        $this->assertNull($career['percent']);
+        $this->assertSame('—', $career['status']);
+
+        $directContact = $summary->get('TOTAL Direct Client Contact');
+        $this->assertSame(96, $directContact['target']);
+        $this->assertEquals(70, $directContact['completed']);
+
+        $grandTotal = $summary->get('GRAND TOTAL');
+        $this->assertEquals(76, $grandTotal['completed']);
+    }
+
+    public function test_the_progress_widget_appears_on_the_log_book_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ManageLogBookEntries::class)
+            ->assertSeeLivewire(PracticumProgressOverview::class);
     }
 }

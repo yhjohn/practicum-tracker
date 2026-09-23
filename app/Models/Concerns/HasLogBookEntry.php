@@ -3,21 +3,22 @@
 namespace App\Models\Concerns;
 
 use App\Models\LogBookEntry;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
- * Keeps a counselling log mirrored as one row in the practicum log book.
+ * Keeps a counselling log mirrored in the practicum log book: one counselling
+ * row plus one hour of management and administration.
  */
 trait HasLogBookEntry
 {
     public static function bootHasLogBookEntry(): void
     {
         static::saved(fn (self $log) => LogBookEntry::syncFrom($log));
-        static::deleted(fn (self $log) => $log->logBookEntry()->delete());
+        static::deleted(fn (self $log) => $log->logBookEntries()->delete());
     }
 
-    public function logBookEntry(): MorphOne
+    public function logBookEntries(): MorphMany
     {
-        return $this->morphOne(LogBookEntry::class, 'loggable');
+        return $this->morphMany(LogBookEntry::class, 'loggable');
     }
 }

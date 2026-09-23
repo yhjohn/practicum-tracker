@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LogBookEntries\Pages;
 
 use App\Exports\LogBookExport;
 use App\Filament\Resources\LogBookEntries\LogBookEntryResource;
+use App\Filament\Widgets\PracticumProgressOverview;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
@@ -14,6 +15,16 @@ use ToneGabes\Filament\Icons\Enums\Phosphor;
 class ManageLogBookEntries extends ManageRecords
 {
     protected static string $resource = LogBookEntryResource::class;
+
+    /**
+     * @return array<int, class-string>
+     */
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            PracticumProgressOverview::class,
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
