@@ -68,18 +68,18 @@ class MentalStatusExaminationForm
                                                 ])
                                                 ->columns(1),
                                             Grid::make(1)
-            ->schema([
-                CheckboxList::make('manual_dexterity')
+                                                ->schema([
+                                                    CheckboxList::make('manual_dexterity')
 
-                    ->label('Manual dexterity')
-                    ->options([
-                        'Good' => 'Good',
-                        'Fair' => 'Fair',
-                        'Poor' => 'Poor',
-                    ]),
-                Textarea::make('motor_function_other')
-                    ->label('Other description(s) in this domain'),
-            ]),
+                                                        ->label('Manual dexterity')
+                                                        ->options([
+                                                            'Good' => 'Good',
+                                                            'Fair' => 'Fair',
+                                                            'Poor' => 'Poor',
+                                                        ]),
+                                                    Textarea::make('motor_function_other')
+                                                        ->label('Other description(s) in this domain'),
+                                                ]),
 
                                         ]),
 

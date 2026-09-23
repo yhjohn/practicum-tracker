@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLogBookEntry;
 use App\Models\Concerns\HasPracticumWeek;
 use App\Models\Concerns\HasWrittenAt;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IndividualCounsellingLog extends Model
 {
+    use HasLogBookEntry;
     use HasPracticumWeek;
     use HasWrittenAt;
 

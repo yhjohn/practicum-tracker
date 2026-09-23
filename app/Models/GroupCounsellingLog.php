@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLogBookEntry;
 use App\Models\Concerns\HasPracticumWeek;
 use App\Models\Concerns\HasWrittenAt;
 use Database\Factories\GroupCounsellingLogFactory;
@@ -15,6 +16,7 @@ class GroupCounsellingLog extends Model
     /** @use HasFactory<GroupCounsellingLogFactory> */
     use HasFactory;
 
+    use HasLogBookEntry;
     use HasPracticumWeek;
     use HasWrittenAt;
 

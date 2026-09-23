@@ -1,13 +1,19 @@
 {
   "mcpServers": {
     "laravelBoost": {
-      "command": "ddev",
-      "args": ["artisan", "boost:mcp"]
+      "command": "/usr/local/bin/ddev",
+      "args": [
+        "artisan",
+        "boost:mcp"
+      ]
     },
     "portainer": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["--from", "mcp-portainer~=2.45.1", "mcp-portainer"],
+      "command": "/Users/johntan/.local/bin/uvx",
+      "args": [
+        "--from",
+        "mcp-portainer~=2.45.1",
+        "mcp-portainer"
+      ],
       "env": {
         "PORTAINER_URL": "http://100.120.158.40:9000",
         "PORTAINER_API_KEY": "ptr_IjO+Pkx3xUJXmsilY4EDCMqlKHJzdUrxyXZxlUiKDfM="

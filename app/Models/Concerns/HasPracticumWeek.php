@@ -24,4 +24,9 @@ trait HasPracticumWeek
             return $days < 0 ? null : intdiv($days, 7) + 1;
         });
     }
+
+    public static function weekStart(int $week): Carbon
+    {
+        return Carbon::parse(config('practicum.start_date'))->startOfDay()->addWeeks($week - 1);
+    }
 }
