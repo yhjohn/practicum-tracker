@@ -34,6 +34,11 @@ class ManageLogBookEntries extends ManageRecords
                 ->icon(Phosphor::FileXls)
                 ->color('gray')
                 ->action(function () {
+                    // ponytail: the XLSX template (18 weekly sheets, styles, merges) needs
+                    // more than PHP's default 256M to load and fill; raise per-request if
+                    // exports start failing again with more weeks or entries.
+                    ini_set('memory_limit', '512M');
+
                     $export = new LogBookExport;
 
                     foreach ($export->warnings() as $warning) {
