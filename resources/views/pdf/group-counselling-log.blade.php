@@ -116,7 +116,7 @@
 
     <table class="header signature">
         <tr><td class="label">Student / Counselor Trainee Name</td><td>{{ $log->facilitator_name }}</td></tr>
-        <tr><td class="label">Signature</td><td></td></tr>
+        <tr><td class="label">Signature</td><td>@include('pdf.signature')</td></tr>
         <tr><td class="label">Date and Time</td><td>{{ optional($log->written_at)->format('d/m/Y H:i') }}</td></tr>
     </table>
 

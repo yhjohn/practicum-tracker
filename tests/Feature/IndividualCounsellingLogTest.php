@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\CreateIndividualCounsellingLog;
+use App\Filament\Resources\IndividualCounsellingLogs\Pages\EditIndividualCounsellingLog;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\ViewIndividualCounsellingLog;
 use App\Models\Client;
 use App\Models\IndividualCounsellingLog;
@@ -11,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\IOFactory;
@@ -89,6 +91,31 @@ class IndividualCounsellingLogTest extends TestCase
         $this->assertNull(IndividualCounsellingLog::firstOrFail()->written_at);
     }
 
+    public function test_editing_sets_written_at_when_the_session_start_is_added_and_changed(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
+
+        $edit = fn (array $data) => Livewire::test(EditIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
+            ->fillForm($data)
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $edit(['place' => 'Campus']);
+        $this->assertNull($log->fresh()->written_at);
+
+        $edit(['session_date' => '2026-09-18', 'start_time' => '10:00']);
+        $writtenAt = $log->fresh()->written_at;
+        $this->assertNotNull($writtenAt);
+        $this->assertTrue($writtenAt->between(Carbon::parse('2026-09-18 13:00'), Carbon::parse('2026-09-19 10:00')));
+
+        $edit(['place' => 'Elsewhere']);
+        $this->assertEquals($writtenAt, $log->fresh()->written_at);
+
+        $edit(['session_date' => '2026-09-25']);
+        $this->assertTrue($log->fresh()->written_at->between(Carbon::parse('2026-09-25 13:00'), Carbon::parse('2026-09-26 10:00')));
+    }
+
     public function test_creating_a_log_stores_uploaded_attachments(): void
     {
         Storage::fake(config('filament.default_filesystem_disk'));
@@ -132,6 +159,8 @@ class IndividualCounsellingLogTest extends TestCase
 
     public function test_download_pdf_action_is_visible_and_callable(): void
     {
+        Http::fake(['*/forms/libreoffice/convert' => Http::response('%PDF-fake')]);
+
         $this->actingAs(User::factory()->create());
         $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
 
@@ -174,6 +203,16 @@ class IndividualCounsellingLogTest extends TestCase
         Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
             ->callAction('downloadDocx')
             ->assertHasNoActionErrors();
+    }
+
+    public function test_pdf_template_shows_the_client_code(): void
+    {
+        $client = Client::factory()->create(['name' => 'Jane Client', 'client_code' => 'J01']);
+        $log = IndividualCounsellingLog::create(['client_id' => $client->id]);
+
+        $html = view('pdf.individual-counselling-log', ['log' => $log])->render();
+
+        $this->assertStringContainsString('Jane Client (J01)', $html);
     }
 
     private function writeFixtureTemplate(): void

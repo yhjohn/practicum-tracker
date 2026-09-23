@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasLogBookEntry;
 use App\Models\Concerns\HasPracticumWeek;
+use App\Models\Concerns\HasWrittenAt;
 use Database\Factories\GroupCounsellingLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class GroupCounsellingLog extends Model
 
     use HasLogBookEntry;
     use HasPracticumWeek;
+    use HasWrittenAt;
 
     protected $guarded = [];
 
@@ -56,9 +58,9 @@ class GroupCounsellingLog extends Model
 
             return [
                 'no' => $index + 1,
-                'name' => $client?->name ?? '',
-                'gender' => $client?->gender() ?? '',
-                'age' => $client?->age() ?? '',
+                'name' => $client?->name_with_code ?? '',
+                'gender' => (string) ($client?->intakeV2?->sex ?? $client?->intake?->sex ?? ''),
+                'age' => (string) ($client?->intakeV2?->age ?? $client?->intake?->age ?? $client?->dob?->age ?? ''),
                 'attendance' => $attendance,
                 'participation' => (string) ($member['participation_level'] ?? ''),
                 'progress_notes' => (string) ($member['progress_notes'] ?? ''),

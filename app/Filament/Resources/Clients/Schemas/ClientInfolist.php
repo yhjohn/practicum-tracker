@@ -18,6 +18,8 @@ class ClientInfolist
             ->components([
                 Section::make('Information')
                     ->schema([
+                        TextEntry::make('client_code')
+                            ->placeholder('-'),
                         TextEntry::make('name'),
                         TextEntry::make('email')
                             ->label('Email address'),
