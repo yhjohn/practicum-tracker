@@ -4,6 +4,7 @@ namespace App\Filament\Resources\GroupCounsellingLogs\Schemas;
 
 use App\Models\GroupCounsellingLog;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
 
@@ -57,26 +58,42 @@ class GroupCounsellingLogInfolist
                     ->placeholder('-')
                     ->columnSpanFull(),
 
-                TextEntry::make('part1_subjective_objective')
-                    ->label('Part 1: Issues / Problems Presented')
-                    ->html()
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('part2_assessment')
-                    ->label('Part 2: Assessment of Issues / Problems')
-                    ->html()
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('part3_treatment_plan')
-                    ->label('Part 3: Treatment Planning and Action')
-                    ->html()
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('part4_evaluation')
-                    ->label('Part 4: Evaluation of Counseling Sessions')
-                    ->html()
-                    ->placeholder('-')
-                    ->columnSpanFull(),
+                Section::make('Part 1: Issues / Problems Presented')
+                    ->schema([
+                        TextEntry::make('part1_subjective_objective')
+                            ->hiddenLabel()
+                            ->html()
+                            ->prose()
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ])->columnSpanFull(),
+                Section::make('Part 2: Assessment of Issues / Problems')
+                    ->schema([
+                        TextEntry::make('part2_assessment')
+                            ->hiddenLabel()
+                            ->html()
+                            ->prose()
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ])->columnSpanFull(),
+                Section::make('Part 3: Treatment Planning and Action')
+                    ->schema([
+                        TextEntry::make('part3_treatment_plan')
+                            ->hiddenLabel()
+                            ->html()
+                            ->prose()
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ])->columnSpanFull(),
+                Section::make('Part 4: Evaluation of Counseling Sessions')
+                    ->schema([
+                        TextEntry::make('part4_evaluation')
+                            ->hiddenLabel()
+                            ->html()
+                            ->prose()
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ])->columnSpanFull(),
 
                 TextEntry::make('attachments')
                     ->state(fn (GroupCounsellingLog $record): string => collect($record->attachments)

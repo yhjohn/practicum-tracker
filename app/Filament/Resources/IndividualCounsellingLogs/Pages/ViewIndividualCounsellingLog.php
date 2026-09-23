@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\Width;
 use PhpOffice\PhpWord\TemplateProcessor;
 use ToneGabes\Filament\Icons\Enums\Phosphor;
 
@@ -17,6 +18,8 @@ class ViewIndividualCounsellingLog extends ViewRecord
     use ExportsReportDocx;
 
     protected static string $resource = IndividualCounsellingLogResource::class;
+
+    protected Width|string|null $maxContentWidth = Width::FiveExtraLarge;
 
     protected function getHeaderActions(): array
     {
@@ -121,8 +124,13 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
     /**
      * RichEditor stores HTML; the docx template only takes plain text, so
-     * paragraph/line breaks become "\n" (PhpWord's setValue() turns those
-     * into <w:br/> automatically) and every other tag is stripped.
+     * every block-level closing tag it can emit (paragraphs, line breaks,
+     * list items, headings, blockquotes, table rows) becomes "\n" (PhpWord's
+     * setValue() turns those into <w:br/> automatically) and every other tag
+     * is stripped. Missing a block tag here just glues that line onto the
+     * next one in the export, so keep this in sync with the RichEditor's
+     * toolbar (any block formatting it offers must have its closing tag
+     * listed below).
      */
     public static function htmlToPlainText(?string $html): string
     {
@@ -130,7 +138,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
             return '';
         }
 
-        $text = preg_replace('/<(br|\/p|\/li)\s*\/?>/i', "\n", $html);
+        $text = preg_replace('/<(br|\/p|\/li|\/h[1-6]|\/blockquote|\/tr)\s*\/?>/i', "\n", $html);
         $text = strip_tags($text);
         $text = html_entity_decode($text, ENT_QUOTES);
 
