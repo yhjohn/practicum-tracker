@@ -87,7 +87,6 @@ class ViewGroupCounsellingLog extends ViewRecord
         }
 
         $processor = new TemplateProcessor($templatePath);
-        $plain = ViewIndividualCounsellingLog::htmlToPlainText(...);
 
         $processor->setValues([
             'group_name' => $record->group?->name ?? '',
@@ -102,12 +101,17 @@ class ViewGroupCounsellingLog extends ViewRecord
             'group_size' => (string) count($record->members ?? []),
             'facilitator_name' => $record->facilitator_name ?? '',
             'supervisor_name' => $record->supervisor_name ?? '',
-            'part1' => $plain($record->part1_subjective_objective),
-            'part2' => $plain($record->part2_assessment),
-            'part3' => $plain($record->part3_treatment_plan),
-            'part4' => $plain($record->part4_evaluation),
             'written_at' => optional($record->written_at)->format('d/m/Y H:i') ?? '',
         ]);
+
+        foreach ([
+            'part1' => $record->part1_subjective_objective,
+            'part2' => $record->part2_assessment,
+            'part3' => $record->part3_treatment_plan,
+            'part4' => $record->part4_evaluation,
+        ] as $macro => $html) {
+            static::setRichText($processor, $macro, $html);
+        }
 
         $rows = $record->memberRows();
 
