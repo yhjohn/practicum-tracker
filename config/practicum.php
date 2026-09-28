@@ -56,8 +56,8 @@ return [
     */
 
     'targets' => [
-        'individual_counselling' => 70,
-        'group_counselling' => 50,
+        'individual_counselling' => 66,
+        'group_counselling' => 30,
         'career_family_couple_counselling' => 0,
         'professional_development' => 0,
         'guidance_and_administration' => 141,

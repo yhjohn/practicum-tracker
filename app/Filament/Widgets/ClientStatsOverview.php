@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClientStatsOverview extends StatsOverviewWidget
 {
-    private const TARGET_INDIVIDUAL_HOURS = 70;
+    private const TARGET_INDIVIDUAL_HOURS = 66;
 
-    private const TARGET_GROUP_HOURS = 50;
+    private const TARGET_GROUP_HOURS = 30;
 
     /**
      * @return array<int, Stat>
