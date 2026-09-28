@@ -53,28 +53,30 @@ class LogBookTest extends TestCase
         $this->assertCount(0, LogBookEntry::all());
     }
 
-    public function test_each_counselling_log_adds_one_hour_of_administration_at_the_same_time(): void
+    public function test_each_counselling_log_adds_one_hour_of_administration_ending_when_the_report_is_written(): void
     {
         $individual = IndividualCounsellingLog::create([
             'client_id' => Client::factory()->create(['name' => 'Jane'])->id,
             'session_date' => '2026-09-21',
             'start_time' => '09:00',
             'duration_hours' => 1.5,
+            'written_at' => '2026-09-21 16:00',
         ]);
-        GroupCounsellingLog::factory()->create(['session_date' => '2026-09-22', 'start_time' => '14:00', 'duration_hours' => 2]);
+        GroupCounsellingLog::factory()->create(['session_date' => '2026-09-22', 'start_time' => '14:00', 'duration_hours' => 2, 'written_at' => '2026-09-23 08:30']);
 
         $admin = LogBookEntry::where('activity', LogBookActivity::ManagementAndAdministration)->orderBy('session_date')->get();
 
         $this->assertCount(2, $admin);
         $this->assertSame('2026-09-21', $admin[0]->session_date->toDateString());
-        $this->assertSame('09:00 – 10:00', $admin[0]->timeRange());
+        $this->assertSame('15:00 – 16:00', $admin[0]->timeRange());
         $this->assertSame('Administration – Individual counselling', $admin[0]->description);
-        $this->assertSame('14:00 – 15:00', $admin[1]->timeRange());
+        $this->assertSame('2026-09-23', $admin[1]->session_date->toDateString());
+        $this->assertSame('07:30 – 08:30', $admin[1]->timeRange());
         $this->assertFalse($admin[0]->isManual());
 
-        $individual->update(['session_date' => '2026-09-23', 'start_time' => '10:00', 'duration_hours' => 3]);
+        $individual->update(['session_date' => '2026-09-23', 'start_time' => '10:00', 'duration_hours' => 3, 'written_at' => '2026-09-23 18:15']);
 
-        $this->assertSame('10:00 – 11:00', $admin[0]->refresh()->timeRange());
+        $this->assertSame('17:15 – 18:15', $admin[0]->refresh()->timeRange());
         $this->assertSame('2026-09-23', $admin[0]->session_date->toDateString());
         $this->assertCount(4, LogBookEntry::all());
 
@@ -227,14 +229,14 @@ class LogBookTest extends TestCase
     public function test_progress_summary_totals_hours_by_component_against_their_targets(): void
     {
         $client = Client::factory()->create();
-        IndividualCounsellingLog::create(['client_id' => $client->id, 'session_date' => '2026-09-15', 'duration_hours' => 70]);
+        IndividualCounsellingLog::create(['client_id' => $client->id, 'session_date' => '2026-09-15', 'duration_hours' => 66]);
         LogBookEntry::factory()->create(['activity' => LogBookActivity::GuidanceActivities, 'duration_hours' => 5, 'session_date' => '2026-09-16']);
 
         $summary = LogBookEntry::progressSummary()->keyBy('label');
 
         $individual = $summary->get('Individual Counselling');
-        $this->assertSame(70, $individual['target']);
-        $this->assertEquals(70, $individual['completed']);
+        $this->assertSame(66, $individual['target']);
+        $this->assertEquals(66, $individual['completed']);
         $this->assertEquals(0, $individual['remaining']);
         $this->assertSame(100.0, $individual['percent']);
         $this->assertSame('Complete', $individual['status']);
@@ -250,10 +252,10 @@ class LogBookTest extends TestCase
 
         $directContact = $summary->get('TOTAL Direct Client Contact');
         $this->assertSame(96, $directContact['target']);
-        $this->assertEquals(70, $directContact['completed']);
+        $this->assertEquals(66, $directContact['completed']);
 
         $grandTotal = $summary->get('GRAND TOTAL');
-        $this->assertEquals(76, $grandTotal['completed']);
+        $this->assertEquals(72, $grandTotal['completed']);
     }
 
     public function test_the_progress_widget_appears_on_the_log_book_page(): void

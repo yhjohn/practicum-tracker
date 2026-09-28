@@ -55,7 +55,7 @@ class LogBookEntry extends Model
 
     /**
      * Create, update or remove the log book rows that mirror an individual or group log:
-     * the counselling session itself and one hour of administration at the same time.
+     * the counselling session itself and one hour of administration ending when the report is written.
      */
     public static function syncFrom(IndividualCounsellingLog|GroupCounsellingLog $log): void
     {
@@ -88,7 +88,13 @@ class LogBookEntry extends Model
             'duration_hours' => $log->duration_hours ?? 0,
         ]);
 
-        $log->logBookEntries()->updateOrCreate(['activity' => LogBookActivity::ManagementAndAdministration], $timing + [
+        // Administration is the hour spent writing the report, so it ends at written_at.
+        $adminTiming = $log->written_at === null ? $timing : [
+            'session_date' => $log->written_at->copy()->subHour()->toDateString(),
+            'start_time' => $log->written_at->copy()->subHour()->format('H:i'),
+        ];
+
+        $log->logBookEntries()->updateOrCreate(['activity' => LogBookActivity::ManagementAndAdministration], $adminTiming + [
             'description' => 'Administration – '.$details['description'],
             'client_code' => $details['client_code'],
             'number_of_clients' => 0,
