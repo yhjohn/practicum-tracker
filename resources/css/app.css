@@ -58,6 +58,16 @@
     }
 }
 
+.claude-summary-section {
+    .fi-section {
+        @apply font-serif text-2xl;
+        background: #f4f3ee;
+        .fi-size-sm {
+            @apply text-lg;
+        }
+    }
+}
+
 /* // mse */
 .mse-items .fi-in-entry-label-col {
         @apply bg-indigo-700! rounded p-3;
