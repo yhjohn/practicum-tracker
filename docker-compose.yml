@@ -36,6 +36,8 @@ services:
       PHP_FPM_POOL_NAME: "practicum_queue"
       # Long-lived subscription token from `claude setup-token`. Set it in Portainer, never in the repo.
       CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN}
+      # Summaries are simple; haiku is fastest and lightest on subscription quota.
+      ANTHROPIC_MODEL: "haiku"
     volumes:
       - /volume1/docker/practicum-tracker:/var/www/html
     depends_on:
