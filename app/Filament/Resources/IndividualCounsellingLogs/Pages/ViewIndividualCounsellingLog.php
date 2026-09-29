@@ -19,7 +19,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
     protected static string $resource = IndividualCounsellingLogResource::class;
 
-    protected Width|string|null $maxContentWidth = Width::FiveExtraLarge;
+    protected Width|string|null $maxContentWidth = Width::SixExtraLarge;
 
     protected function getHeaderActions(): array
     {
