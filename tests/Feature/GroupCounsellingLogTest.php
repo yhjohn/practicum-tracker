@@ -181,7 +181,7 @@ class GroupCounsellingLogTest extends TestCase
 
         Livewire::test(ClientStatsOverview::class)
             ->assertSee('Group counselling hours')
-            ->assertSee('3.5 / 50')
-            ->assertSee('46.5 h to go');
+            ->assertSee('3.5 / 30')
+            ->assertSee('26.5 h to go');
     }
 }

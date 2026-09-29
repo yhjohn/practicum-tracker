@@ -74,6 +74,9 @@ class IndividualCounsellingLogForm
                             ->step(0.25),
                         TextInput::make('place')
                             ->label('Place / Organization'),
+                        TextInput::make('referral_source'),
+                        TextInput::make('counselling_approach')
+                            ->label('Counselling approach'),
                         Radio::make('session_number')
                             ->label('Session no.')
                             ->options([
@@ -81,6 +84,10 @@ class IndividualCounsellingLogForm
                                 '6' => '6', '7' => '7', '8' => '8', '9' => '9',
                             ])
                             ->inline(),
+                        TextInput::make('total_sessions_planned')
+                            ->label('Total sessions planned')
+                            ->numeric()
+                            ->minValue(1),
                         FileUpload::make('attachments')
                             ->multiple()
                             ->directory('individual-counselling-logs')

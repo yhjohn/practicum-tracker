@@ -38,8 +38,16 @@ class IndividualCounsellingLogInfolist
                                     ->placeholder('-'),
                                 TextEntry::make('place')
                                     ->placeholder('-'),
+                                TextEntry::make('referral_source')
+                                    ->placeholder('-'),
+                                TextEntry::make('counselling_approach')
+                                    ->label('Counselling approach')
+                                    ->placeholder('-'),
                                 TextEntry::make('session_number')
                                     ->label('Session no.')
+                                    ->placeholder('-'),
+                                TextEntry::make('total_sessions_planned')
+                                    ->label('Total sessions planned')
                                     ->placeholder('-'),
                             ])
                             ->extraAttributes(['class' => 'invert-section'])

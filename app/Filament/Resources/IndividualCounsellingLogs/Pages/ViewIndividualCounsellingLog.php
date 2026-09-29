@@ -19,40 +19,47 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
     protected static string $resource = IndividualCounsellingLogResource::class;
 
+    protected static ?string $title = 'Individual Counselling Log';
+
     protected Width|string|null $maxContentWidth = Width::SixExtraLarge;
 
     protected function getHeaderActions(): array
     {
         return [
             Action::make('downloadPdf')
-                ->label('Download report PDF')
+                ->label('v1 PDF')
                 ->icon(Phosphor::FileArrowDown)
                 ->action(fn (IndividualCounsellingLog $record) => static::downloadPdf($record)),
             Action::make('downloadDocx')
-                ->label('Download report DOCX')
+                ->label('v1 DOCX')
                 ->icon(Phosphor::FileArrowDown)
                 ->action(fn (IndividualCounsellingLog $record) => static::downloadDocx($record)),
+            Action::make('downloadPdfV2')
+                ->label('v2 PDF')
+                ->icon(Phosphor::FileArrowDown)
+                ->action(fn (IndividualCounsellingLog $record) => static::downloadPdf($record, 'v2')),
+            Action::make('downloadDocxV2')
+                ->label('v2 DOCX')
+                ->icon(Phosphor::FileArrowDown)
+                ->action(fn (IndividualCounsellingLog $record) => static::downloadDocx($record, 'v2')),
             EditAction::make(),
         ];
     }
 
-    protected static function downloadDocx(IndividualCounsellingLog $record): mixed
+    protected static function downloadDocx(IndividualCounsellingLog $record, string $version = 'v1'): mixed
     {
-        $path = static::generateDocx($record);
+        $path = static::generateDocx($record, $version);
 
         if (! $path) {
             return null;
         }
 
-        return response()->download(
-            $path,
-            "individual-counselling-report-{$record->client?->name}-{$record->id}.docx",
-        );
+        return response()->download($path, static::downloadName($record, $version).'.docx');
     }
 
-    protected static function downloadPdf(IndividualCounsellingLog $record): mixed
+    protected static function downloadPdf(IndividualCounsellingLog $record, string $version = 'v1'): mixed
     {
-        $docxPath = static::generateDocx($record);
+        $docxPath = static::generateDocx($record, $version);
 
         if (! $docxPath) {
             return null;
@@ -66,23 +73,33 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
         return response()->streamDownload(
             fn () => print ($pdf),
-            "individual-counselling-report-{$record->client?->name}-{$record->id}.pdf",
+            static::downloadName($record, $version).'.pdf',
         );
     }
 
-    /**
-     * Rebuilds and stores the DOCX from the template, always fresh, at a
-     * path keyed by the record id so repeat exports reuse the same file.
-     */
-    protected static function generateDocx(IndividualCounsellingLog $record): ?string
+    protected static function downloadName(IndividualCounsellingLog $record, string $version): string
     {
-        $templatePath = resource_path('templates/individual-counselling-log.docx');
+        $suffix = $version === 'v1' ? '' : "-{$version}";
+
+        return "individual-counselling-report{$suffix}-{$record->client?->name}-{$record->id}";
+    }
+
+    /**
+     * Rebuilds and stores the DOCX from the version's template, always fresh,
+     * at a path keyed by version and record id so repeat exports reuse the
+     * same file.
+     */
+    protected static function generateDocx(IndividualCounsellingLog $record, string $version = 'v1'): ?string
+    {
+        $isV2 = $version === 'v2';
+        $templateName = $isV2 ? 'Individual Progress Notes.docx' : 'individual-counselling-log.docx';
+        $templatePath = resource_path("templates/{$templateName}");
 
         if (! is_file($templatePath)) {
             Notification::make()
                 ->danger()
                 ->title('DOCX template missing')
-                ->body('Add the template to resources/templates/individual-counselling-log.docx first.')
+                ->body("Add the template to resources/templates/{$templateName} first.")
                 ->send();
 
             return null;
@@ -92,21 +109,40 @@ class ViewIndividualCounsellingLog extends ViewRecord
 
         $processor->setValues([
             'client_name' => $record->client?->name_with_code ?? '',
-            'session_date' => optional($record->session_date)->format('d M Y') ?? '',
+            'session_date' => optional($record->session_date)->format($isV2 ? 'j F Y' : 'd M Y') ?? '',
             'session_number' => (string) ($record->session_number ?? ''),
             'time' => optional($record->start_time)->format('H:i') ?? '',
             'duration' => $record->duration_hours ? "{$record->duration_hours} hrs" : '',
             'place' => $record->place ?? '',
-            'part1' => static::htmlToPlainText($record->part1_subjective_objective),
-            'part2' => static::htmlToPlainText($record->part2_assessment),
-            'part3' => static::htmlToPlainText($record->part3_treatment_plan),
-            'part4' => static::htmlToPlainText($record->part4_evaluation),
             'written_at' => optional($record->written_at)->format('d/m/Y H:i') ?? '',
         ]);
 
+        if ($isV2) {
+            $processor->setValues([
+                'age' => $record->client?->age ?? '',
+                'gender' => $record->client?->gender ?? '',
+                'occupation' => $record->client?->intakeV2?->occupation ?? $record->client?->intake?->occupation ?? '',
+                'student_name' => auth()->user()?->name ?? '',
+                'referral_source' => $record->referral_source ?? '',
+                'counselling_approach' => $record->counselling_approach ?? '',
+                'total_sessions' => (string) ($record->total_sessions_planned ?? ''),
+            ]);
+        }
+
+        foreach ([
+            'part1' => $record->part1_subjective_objective,
+            'part2' => $record->part2_assessment,
+            'part3' => $record->part3_treatment_plan,
+            'part4' => $record->part4_evaluation,
+        ] as $macro => $html) {
+            $isV2
+                ? static::setRichText($processor, $macro, $html, 'Arial', null, 360)
+                : static::setRichText($processor, $macro, $html);
+        }
+
         static::fillSignature($processor);
 
-        return static::storeDocx($processor, "individual-counselling-log-{$record->id}");
+        return static::storeDocx($processor, $isV2 ? "individual-counselling-log-v2-{$record->id}" : "individual-counselling-log-{$record->id}");
     }
 
     public static function fillSignature(TemplateProcessor $processor): void
@@ -120,28 +156,5 @@ class ViewIndividualCounsellingLog extends ViewRecord
         }
 
         $processor->setImageValue('signature', ['path' => $path, 'width' => 120, 'height' => 95]);
-    }
-
-    /**
-     * RichEditor stores HTML; the docx template only takes plain text, so
-     * every block-level closing tag it can emit (paragraphs, line breaks,
-     * list items, headings, blockquotes, table rows) becomes "\n" (PhpWord's
-     * setValue() turns those into <w:br/> automatically) and every other tag
-     * is stripped. Missing a block tag here just glues that line onto the
-     * next one in the export, so keep this in sync with the RichEditor's
-     * toolbar (any block formatting it offers must have its closing tag
-     * listed below).
-     */
-    public static function htmlToPlainText(?string $html): string
-    {
-        if (blank($html)) {
-            return '';
-        }
-
-        $text = preg_replace('/<(br|\/p|\/li|\/h[1-6]|\/blockquote|\/tr)\s*\/?>/i', "\n", $html);
-        $text = strip_tags($text);
-        $text = html_entity_decode($text, ENT_QUOTES);
-
-        return trim($text);
     }
 }

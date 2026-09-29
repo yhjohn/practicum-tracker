@@ -219,6 +219,62 @@ class IndividualCounsellingLogTest extends TestCase
             ->assertHasNoActionErrors();
     }
 
+    public function test_docx_keeps_bold_breaks_headings_and_lists(): void
+    {
+        $xml = ViewIndividualCounsellingLog::htmlToWordXml(
+            '<h3>Core Issues</h3><p>Plain <strong>bold &amp; co</strong><br><em>quote</em></p>'
+            .'<ol start="1"><li><p>One</p><ul><li><p>Nested</p></li></ul></li><li><p>Two</p></li></ol>'
+        );
+
+        $dom = new \DOMDocument;
+        $this->assertTrue($dom->loadXML('<root xmlns:w="w">'.$xml.'</root>'));
+
+        $this->assertStringContainsString('<w:b/>', $xml);
+        $this->assertStringContainsString('<w:i/>', $xml);
+        $this->assertStringContainsString('<w:br/>', $xml);
+        $this->assertStringContainsString('bold &amp; co', $xml);
+        $this->assertStringContainsString('<w:t xml:space="preserve">1.</w:t>', $xml);
+        $this->assertStringContainsString('<w:t xml:space="preserve">2.</w:t>', $xml);
+        $this->assertStringContainsString('<w:t xml:space="preserve">•</w:t>', $xml);
+        $this->assertSame(5, substr_count($xml, '<w:p>'));
+    }
+
+    public function test_v2_docx_fills_the_progress_notes_template(): void
+    {
+        $user = User::factory()->create(['name' => 'Trainee Tan']);
+        $this->actingAs($user);
+        $client = Client::factory()->create(['name' => 'Jane Client']);
+        $log = IndividualCounsellingLog::create([
+            'client_id' => $client->id,
+            'session_date' => '2026-09-17',
+            'session_number' => 2,
+            'total_sessions_planned' => 5,
+            'referral_source' => 'Self-referred',
+            'counselling_approach' => 'Person-Centred',
+            'part1_subjective_objective' => '<p>Presented <strong>anxious</strong>.</p>',
+            'part2_assessment' => '<h3>Core Issues</h3><ul><li><p>Work stress</p></li></ul>',
+        ]);
+
+        Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
+            ->callAction('downloadDocxV2')
+            ->assertHasNoActionErrors();
+
+        $zip = new \ZipArchive;
+        $zip->open(Storage::disk('local')->path("exports/individual-counselling-log-v2-{$log->id}.docx"));
+        $xml = $zip->getFromName('word/document.xml');
+
+        $this->assertStringNotContainsString('${', $xml);
+        $this->assertStringNotContainsString('FF0000', $xml);
+        $this->assertStringContainsString('Jane Client', $xml);
+        $this->assertStringContainsString('17 September 2026', $xml);
+        $this->assertStringContainsString('Trainee Tan', $xml);
+        $this->assertStringContainsString('Self-referred', $xml);
+        $this->assertStringContainsString('Person-Centred', $xml);
+        $this->assertStringContainsString('2/5', $xml);
+        $this->assertStringContainsString('<w:b/>', $xml);
+        $this->assertStringContainsString('Work stress', $xml);
+    }
+
     public function test_pdf_template_shows_the_client_code(): void
     {
         $client = Client::factory()->create(['name' => 'Jane Client', 'client_code' => 'J01']);
