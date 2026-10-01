@@ -84,7 +84,7 @@ input:focus{border-color:#9a82d5}
 input::placeholder{color:#b3adbf;opacity:1}
 .actions{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr;
   gap:10px;
   margin-top:18px;
 }
@@ -98,10 +98,9 @@ button{
   transition:.15s ease;
 }
 button:hover{transform:translateY(-2px)}
-.save{background:#d8c8f7;color:#35245f}
+.save{background:#fff1a8;color:#5c4a00}
 .start{background:#bfe6b5;color:#1f4c27}
 .reset{background:#d8c8f7;color:#35245f}
-.back{background:white;border:2px solid #ddd8e3}
 .tip{
   margin-top:15px;
   padding:13px;
@@ -241,11 +240,16 @@ button:hover{transform:translateY(-2px)}
   user-select:none;
   transition:.15s ease;
 }
-.food:nth-child(5n+1){background:#f7efff}
-.food:nth-child(5n+2){background:#eef7ff}
-.food:nth-child(5n+3){background:#fff9dd}
-.food:nth-child(5n+4){background:#fff0f1}
-.food:nth-child(5n+5){background:#eef9e9}
+.food:nth-child(10n+1){background:#f7efff}
+.food:nth-child(10n+2){background:#eef7ff}
+.food:nth-child(10n+3){background:#fff9dd}
+.food:nth-child(10n+4){background:#fff0f1}
+.food:nth-child(10n+5){background:#eef9e9}
+.food:nth-child(10n+6){background:#ffeedd}
+.food:nth-child(10n+7){background:#e6faf7}
+.food:nth-child(10n+8){background:#fde8f6}
+.food:nth-child(10n+9){background:#f0f4d8}
+.food:nth-child(10n+10){background:#e9ecff}
 .food:hover{transform:translateY(-2px)}
 .food{touch-action:none}
 .food.dragging{opacity:.45;transform:scale(.98)}
@@ -342,7 +346,6 @@ button:hover{transform:translateY(-2px)}
       <div class="setup-grid" id="fields"></div>
 
       <div class="actions">
-        <!-- <button class="save" onclick="saveGame()">💾 Save Game</button> -->
         <button class="start" onclick="startGame()">🎮 Start Game</button>
       </div>
 
@@ -388,30 +391,32 @@ button:hover{transform:translateY(-2px)}
 
       <div class="game-actions">
         <button class="reset" onclick="resetGame()">↻ Reset Gremlin</button>
-        <button class="back" onclick="backToBuilder()">✏️ Back to Examples</button>
+        <button class="save" onclick="useDemoText()">✨ Demo</button>
       </div>
     </section>
   </div>
 </div>
 
 <script>
+const demoExamples=[
+  "I'm going to fail",
+  "My brain goes blank",
+  "My heart beats so fast",
+  "I feel so anxious",
+  "I can't focus",
+  "I keep thinking negative",
+  "I compare with others",
+  "I procrastinate",
+  "I skip meals or sleep",
+  "I avoid studying"
+];
+
 const fieldContainer=document.getElementById("fields");
 for(let i=1;i<=10;i++){
   fieldContainer.innerHTML += `
     <div class="field">
       <label>Example ${i}</label>
-      <input id="example${i}" placeholder="${[
-        "I'm going to fail",
-        "My brain goes blank",
-        "My heart beats so fast",
-        "I feel so anxious",
-        "I can't focus",
-        "I keep thinking negative",
-        "I compare with others",
-        "I procrastinate",
-        "I skip meals or sleep",
-        "I avoid studying"
-      ][i-1]}">
+      <input id="example${i}" placeholder="${demoExamples[i-1]}">
     </div>`;
 }
 
@@ -424,23 +429,23 @@ function getExamples(){
   }).filter(Boolean);
 }
 
-function saveGame(){
+function useDemoText(){
+  playWith(demoExamples);
+}
+
+function startGame(){
   const data=getExamples();
   if(!data.length){
     alert("Please enter at least one example first.");
     return;
   }
-  localStorage.setItem("examStressGremlinExamples",JSON.stringify(data));
-  alert("Saved! Your examples are ready for the game.");
+  playWith(data);
 }
 
-function startGame(){
-  examples=getExamples();
-  if(!examples.length){
-    alert("Please enter at least one example first.");
-    return;
-  }
+function playWith(cards){
+  examples=cards;
   score=0;
+  document.getElementById("thoughtBubble").classList.add("hidden");
   renderFoods();
   updateGremlin();
   document.getElementById("gamePanel").scrollIntoView({behavior:"smooth",block:"start"});
@@ -538,10 +543,6 @@ function resetGame(){
   document.getElementById("thoughtBubble").classList.add("hidden");
   document.getElementById("message").textContent="The Gremlin is feeling a little stressed... choose something to feed it!";
   updateGremlin();
-}
-
-function backToBuilder(){
-  document.getElementById("builderPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 </script>
 </body>
