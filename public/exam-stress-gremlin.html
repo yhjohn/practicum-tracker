@@ -247,7 +247,9 @@ button:hover{transform:translateY(-2px)}
 .food:nth-child(5n+4){background:#fff0f1}
 .food:nth-child(5n+5){background:#eef9e9}
 .food:hover{transform:translateY(-2px)}
+.food{touch-action:none}
 .food.dragging{opacity:.45;transform:scale(.98)}
+.food.ghost{position:fixed;z-index:1000;pointer-events:none;opacity:.9;box-shadow:0 8px 18px rgba(50,30,90,.25)}
 .game-actions{
   display:flex;
   justify-content:center;
@@ -450,36 +452,58 @@ function renderFoods(){
   examples.forEach((text,index)=>{
     const div=document.createElement("div");
     div.className="food";
-    div.draggable=true;
     div.textContent=text;
-    div.dataset.amount=10+(index%3)*5;
-
-    div.addEventListener("dragstart",e=>{
-      div.classList.add("dragging");
-      e.dataTransfer.setData("text/plain",text);
-      e.dataTransfer.setData("amount",div.dataset.amount);
-    });
-    div.addEventListener("dragend",()=>div.classList.remove("dragging"));
+    const amount=10+(index%3)*5;
+    div.addEventListener("pointerdown",e=>startDrag(e,div,text,amount));
     foods.appendChild(div);
   });
 }
 
 const gremlin=document.getElementById("gremlin");
+const gremlinWrap=gremlin.parentElement;
 
-gremlin.addEventListener("dragover",e=>{
+function isOverGremlin(x,y){
+  const g=gremlin.getBoundingClientRect();
+  const w=gremlinWrap.getBoundingClientRect();
+  return x>=Math.max(g.left,w.left)&&x<=Math.min(g.right,w.right)
+    &&y>=Math.max(g.top,w.top)&&y<=Math.min(g.bottom,w.bottom);
+}
+
+/* Pointer events instead of HTML5 drag-and-drop so it works with touch (iPad) as well as a mouse. */
+function startDrag(e,card,text,amount){
   e.preventDefault();
-  gremlin.classList.add("dragover");
-});
-gremlin.addEventListener("dragleave",()=>{
-  gremlin.classList.remove("dragover");
-});
-gremlin.addEventListener("drop",e=>{
-  e.preventDefault();
-  gremlin.classList.remove("dragover");
-  const text=e.dataTransfer.getData("text/plain");
-  const amount=Number(e.dataTransfer.getData("amount"))||10;
-  feed(text,amount);
-});
+  const rect=card.getBoundingClientRect();
+  const offsetX=e.clientX-rect.left;
+  const offsetY=e.clientY-rect.top;
+  const ghost=card.cloneNode(true);
+  ghost.classList.add("ghost");
+  ghost.style.width=rect.width+"px";
+  ghost.style.height=rect.height+"px";
+  ghost.style.background=getComputedStyle(card).backgroundColor;
+  document.body.appendChild(ghost);
+  card.classList.add("dragging");
+
+  const move=ev=>{
+    ghost.style.left=(ev.clientX-offsetX)+"px";
+    ghost.style.top=(ev.clientY-offsetY)+"px";
+    gremlin.classList.toggle("dragover",isOverGremlin(ev.clientX,ev.clientY));
+  };
+  const end=ev=>{
+    document.removeEventListener("pointermove",move);
+    document.removeEventListener("pointerup",end);
+    document.removeEventListener("pointercancel",end);
+    ghost.remove();
+    card.classList.remove("dragging");
+    gremlin.classList.remove("dragover");
+    if(ev.type==="pointerup"&&isOverGremlin(ev.clientX,ev.clientY)){
+      feed(text,amount);
+    }
+  };
+  move(e);
+  document.addEventListener("pointermove",move);
+  document.addEventListener("pointerup",end);
+  document.addEventListener("pointercancel",end);
+}
 
 function feed(text,amount){
   score=Math.min(100,score+amount);
