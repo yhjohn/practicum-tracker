@@ -52,6 +52,14 @@
                 </div>
             </td>
         </tr>
+        <tr>
+            <td class="label">Counsellor signature</td>
+            <td>@include('pdf.signature')</td>
+        </tr>
+        <tr>
+            <td class="label">Counsellor date signed</td>
+            <td>{{ optional($consent->signature_date)->format('d M Y') ?? '-' }}</td>
+        </tr>
     </table>
 </body>
 </html>
