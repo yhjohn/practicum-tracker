@@ -54,7 +54,15 @@
         </tr>
         <tr>
             <td class="label">Counsellor signature</td>
-            <td>@include('pdf.signature')</td>
+            <td>
+                <div class="signature-box">
+                    @include('pdf.signature')
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Counsellor name</td>
+            <td>Joleen Poh Ee Bing</td>
         </tr>
         <tr>
             <td class="label">Counsellor date signed</td>

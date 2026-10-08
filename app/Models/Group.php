@@ -28,6 +28,11 @@ class Group extends Model
         return $this->morphMany(CounsellingSession::class, 'sessionable');
     }
 
+    public function consents(): HasMany
+    {
+        return $this->hasMany(GroupConsent::class);
+    }
+
     public function counsellingLogs(): HasMany
     {
         return $this->hasMany(GroupCounsellingLog::class);

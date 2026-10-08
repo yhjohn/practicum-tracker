@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Client;
+use App\Models\Group;
+use App\Models\GroupConsent;
 use App\Models\IntakeV2;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
@@ -78,6 +80,11 @@ class PublicClientPortal extends Component
             ]);
         }
 
+        $groupConsents = $this->client?->groups->map(fn (Group $group): GroupConsent => GroupConsent::firstOrCreate(
+            ['client_id' => $this->client->id, 'group_id' => $group->id],
+            ['full_name' => $this->client->name, 'dob' => $this->client->dob],
+        )) ?? collect();
+
         $intakeRouteName = $intake instanceof IntakeV2 ? 'intake-v2.show' : 'intake.show';
 
         return view('livewire.public-client-portal', [
@@ -85,6 +92,7 @@ class PublicClientPortal extends Component
             'consent' => $consent,
             'intakeUrl' => $intake ? URL::temporarySignedRoute($intakeRouteName, now()->addDays(30), ['intake' => $intake->id]) : null,
             'consentUrl' => $consent ? URL::temporarySignedRoute('consent.show', now()->addDays(30), ['consent' => $consent->id]) : null,
+            'groupConsents' => $groupConsents,
         ]);
     }
 
