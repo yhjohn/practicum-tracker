@@ -2,9 +2,11 @@
 
 use App\Livewire\PublicClientPortal;
 use App\Livewire\PublicConsentForm;
+use App\Livewire\PublicGroupConsentForm;
 use App\Livewire\PublicIntakeForm;
 use App\Livewire\PublicIntakeFormV2;
 use App\Models\Consent;
+use App\Models\GroupConsent;
 use App\Models\Intake;
 use App\Models\IntakeV2;
 use Illuminate\Support\Facades\Route;
@@ -41,3 +43,11 @@ Route::get('/consent/{consent}', function (Consent $consent) {
 
     return app()->call(PublicConsentForm::class.'@__invoke', ['consent' => $consent]);
 })->middleware('signed')->name('consent.show');
+
+Route::get('/group-consent/{groupConsent}', function (GroupConsent $groupConsent) {
+    if (! session("client_portal.{$groupConsent->client_id}") || now()->gt(session("client_portal.{$groupConsent->client_id}"))) {
+        return redirect()->to(URL::temporarySignedRoute('client.portal', $groupConsent->client->public_access_expires_at, ['token' => $groupConsent->client->public_access_token]));
+    }
+
+    return app()->call(PublicGroupConsentForm::class.'@__invoke', ['groupConsent' => $groupConsent]);
+})->middleware('signed')->name('group-consent.show');

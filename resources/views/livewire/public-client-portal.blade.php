@@ -60,6 +60,28 @@
                     @endif
                 </div>
 
+                @foreach ($groupConsents as $groupConsent)
+                    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-gray-900">Group consent &middot; {{ $groupConsent->group->name }}</h2>
+                            @if ($groupConsent->status === \App\Enums\ConsentStatus::Submitted)
+                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">✓ Signed</span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">! Pending</span>
+                            @endif
+                        </div>
+
+                        @if ($groupConsent->status === \App\Enums\ConsentStatus::Submitted)
+                            <p class="mt-4 text-sm text-gray-600">Your group consent form has been signed and submitted.</p>
+                        @else
+                            <p class="mt-4 text-sm text-gray-600">Your group consent form is still pending.</p>
+                            <a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('group-consent.show', now()->addDays(30), ['groupConsent' => $groupConsent->id]) }}" class="mt-4 inline-flex rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">
+                                Open group consent form
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+
                 <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-gray-900">Intake form</h2>
