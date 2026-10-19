@@ -95,7 +95,8 @@ class LogBookEntry extends Model
         ];
 
         $log->logBookEntries()->updateOrCreate(['activity' => LogBookActivity::ManagementAndAdministration], $adminTiming + [
-            'description' => 'Administration – '.$details['description'],
+            'description' => 'Administration – Case Report Writing '.($log instanceof IndividualCounsellingLog ? 'Individual' : 'Group').' Counselling'
+                .($log->session_number ? " – Session {$log->session_number}" : ''),
             'client_code' => $details['client_code'],
             'number_of_clients' => 0,
             'duration_hours' => 1,

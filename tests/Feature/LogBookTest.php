@@ -69,7 +69,8 @@ class LogBookTest extends TestCase
         $this->assertCount(2, $admin);
         $this->assertSame('2026-09-21', $admin[0]->session_date->toDateString());
         $this->assertSame('15:00 – 16:00', $admin[0]->timeRange());
-        $this->assertSame('Administration – Individual counselling', $admin[0]->description);
+        $this->assertSame('Administration – Case Report Writing Individual Counselling', $admin[0]->description);
+        $this->assertStringStartsWith('Administration – Case Report Writing Group Counselling – Session ', $admin[1]->description);
         $this->assertSame('2026-09-23', $admin[1]->session_date->toDateString());
         $this->assertSame('07:30 – 08:30', $admin[1]->timeRange());
         $this->assertFalse($admin[0]->isManual());
@@ -83,6 +84,34 @@ class LogBookTest extends TestCase
         $individual->update(['session_date' => null]);
 
         $this->assertCount(2, LogBookEntry::all());
+    }
+
+    public function test_individual_administration_entry_names_the_case_report_and_session_number(): void
+    {
+        IndividualCounsellingLog::create([
+            'client_id' => Client::factory()->create()->id,
+            'session_date' => '2026-09-21',
+            'session_number' => 3,
+            'written_at' => '2026-09-21 16:00',
+        ]);
+
+        $admin = LogBookEntry::where('activity', LogBookActivity::ManagementAndAdministration)->sole();
+
+        $this->assertSame('Administration – Case Report Writing Individual Counselling – Session 3', $admin->description);
+    }
+
+    public function test_group_administration_entry_names_the_case_report_and_session_number(): void
+    {
+        GroupCounsellingLog::factory()->create([
+            'session_date' => '2026-09-22',
+            'session_number' => 2,
+            'session_theme' => 'Coping',
+            'written_at' => '2026-09-23 08:30',
+        ]);
+
+        $admin = LogBookEntry::where('activity', LogBookActivity::ManagementAndAdministration)->sole();
+
+        $this->assertSame('Administration – Case Report Writing Group Counselling – Session 2', $admin->description);
     }
 
     public function test_log_without_a_session_date_has_no_log_book_entry(): void
