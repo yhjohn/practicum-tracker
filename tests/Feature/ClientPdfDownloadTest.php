@@ -70,6 +70,15 @@ class ClientPdfDownloadTest extends TestCase
         $this->assertStringStartsWith('%PDF', $pdf);
     }
 
+    public function test_consent_pdf_template_shows_the_client_name(): void
+    {
+        $consent = Consent::factory()->submitted()->create(['full_name' => 'Jane Client']);
+
+        $html = view('pdf.consent', ['consent' => $consent])->render();
+
+        $this->assertMatchesRegularExpression('/Client name<\/td>\s*<td>Jane Client<\/td>/', $html);
+    }
+
     public function test_intake_pdf_template_renders_the_signature_image(): void
     {
         $intake = Intake::factory()->submitted()->create();

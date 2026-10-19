@@ -151,6 +151,11 @@ class Client extends Model
         return $this->hasMany(GroupConsent::class);
     }
 
+    public function sessionPlans(): HasMany
+    {
+        return $this->hasMany(SessionPlan::class);
+    }
+
     public function mse(): HasOne
     {
         return $this->hasOne(MentalStatusExamination::class);

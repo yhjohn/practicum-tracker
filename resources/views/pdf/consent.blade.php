@@ -53,6 +53,10 @@
             </td>
         </tr>
         <tr>
+            <td class="label">Client name</td>
+            <td>{{ $consent->full_name }}</td>
+        </tr>
+        <tr>
             <td class="label">Counsellor signature</td>
             <td>
                 <div class="signature-box">
