@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Clients\Tables;
 
+use App\Filament\Resources\Clients\ClientResource;
+use App\Models\Client;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use ToneGabes\Filament\Icons\Enums\Phosphor;
 
 class ClientsTable
 {
@@ -45,6 +49,10 @@ class ClientsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('sessionPlans')
+                    ->label('Session plans')
+                    ->icon(Phosphor::Notepad)
+                    ->url(fn (Client $record): string => ClientResource::getUrl('session-plans', ['record' => $record])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
