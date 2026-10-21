@@ -243,7 +243,7 @@ class IndividualCounsellingLogTest extends TestCase
     {
         $user = User::factory()->create(['name' => 'Trainee Tan']);
         $this->actingAs($user);
-        $client = Client::factory()->create(['name' => 'Jane Client']);
+        $client = Client::factory()->create(['name' => 'Jane Client', 'client_code' => 'J01']);
         $log = IndividualCounsellingLog::create([
             'client_id' => $client->id,
             'session_date' => '2026-09-17',
@@ -257,7 +257,8 @@ class IndividualCounsellingLogTest extends TestCase
 
         Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
             ->callAction('downloadDocxV2')
-            ->assertHasNoActionErrors();
+            ->assertHasNoActionErrors()
+            ->assertFileDownloaded('individual-counselling-report-v2-J01 SESSION 2.docx');
 
         $zip = new \ZipArchive;
         $zip->open(Storage::disk('local')->path("exports/individual-counselling-log-v2-{$log->id}.docx"));
@@ -265,7 +266,8 @@ class IndividualCounsellingLogTest extends TestCase
 
         $this->assertStringNotContainsString('${', $xml);
         $this->assertStringNotContainsString('FF0000', $xml);
-        $this->assertStringContainsString('Jane Client', $xml);
+        $this->assertStringContainsString('J01', $xml);
+        $this->assertStringNotContainsString('Jane Client', $xml);
         $this->assertStringContainsString('17 September 2026', $xml);
         $this->assertStringContainsString('Trainee Tan', $xml);
         $this->assertStringContainsString('Self-referred', $xml);
