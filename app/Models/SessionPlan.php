@@ -14,6 +14,10 @@ class SessionPlan extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'attachments' => 'array',
+    ];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Clients\Resources\SessionPlans\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\Page;
@@ -23,6 +24,14 @@ class SessionPlanForm
                     ->default(fn (Page $livewire): int => $livewire->getParentRecord()->sessionPlans()->max('session_number') + 1)
                     ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule, Page $livewire): Unique => $rule->where('client_id', $livewire->getParentRecord()->getKey())),
                 RichEditor::make('plan')
+                    ->columnSpanFull(),
+                FileUpload::make('attachments')
+                    ->multiple()
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->directory('session-plans')
+                    ->visibility('private')
+                    ->downloadable()
+                    ->openable()
                     ->columnSpanFull(),
             ]);
     }
