@@ -81,7 +81,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
     {
         $suffix = $version === 'v1' ? '' : "-{$version}";
 
-        return "individual-counselling-report{$suffix}-{$record->client?->name}-{$record->id}";
+        return "individual-counselling-report{$suffix}-{$record->client?->client_code} SESSION {$record->session_number}";
     }
 
     /**
@@ -108,7 +108,7 @@ class ViewIndividualCounsellingLog extends ViewRecord
         $processor = new TemplateProcessor($templatePath);
 
         $processor->setValues([
-            'client_name' => $record->client?->name_with_code ?? '',
+            'client_name' => $record->client?->client_code ?? '',
             'session_date' => optional($record->session_date)->format($isV2 ? 'j F Y' : 'd M Y') ?? '',
             'session_number' => (string) ($record->session_number ?? ''),
             'time' => optional($record->start_time)->format('H:i') ?? '',

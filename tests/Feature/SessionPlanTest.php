@@ -12,6 +12,8 @@ use App\Models\SessionPlan;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -40,6 +42,20 @@ class SessionPlanTest extends TestCase
             ->assertCanNotSeeTableRecords([$otherPlan]);
     }
 
+    public function test_table_links_attachments_to_open_in_a_new_tab(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        SessionPlan::factory()->create([
+            'client_id' => $client->id,
+            'attachments' => ['session-plans/worksheet.pdf'],
+        ]);
+
+        Livewire::test(ManageClientSessionPlans::class, ['record' => $client->getRouteKey()])
+            ->assertSeeHtml('target="_blank"')
+            ->assertSee('worksheet.pdf');
+    }
+
     public function test_creating_a_session_plan_saves_it_for_the_client(): void
     {
         $this->actingAs(User::factory()->create());
@@ -57,6 +73,48 @@ class SessionPlanTest extends TestCase
 
         $this->assertSame(1, $plan->session_number);
         $this->assertStringContainsString('Build rapport', $plan->plan);
+    }
+
+    public function test_creating_a_session_plan_stores_uploaded_pdfs_and_images(): void
+    {
+        Storage::fake(config('filament.default_filesystem_disk'));
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(CreateSessionPlan::class, ['parentRecord' => $client])
+            ->fillForm([
+                'session_number' => 1,
+                'attachments' => [
+                    UploadedFile::fake()->create('worksheet.pdf', 10, 'application/pdf'),
+                    UploadedFile::fake()->image('genogram.png'),
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $attachments = $client->sessionPlans()->sole()->attachments;
+
+        $this->assertCount(2, $attachments);
+        foreach ($attachments as $path) {
+            Storage::disk(config('filament.default_filesystem_disk'))->assertExists($path);
+        }
+    }
+
+    public function test_session_plan_attachments_reject_other_file_types(): void
+    {
+        Storage::fake(config('filament.default_filesystem_disk'));
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(CreateSessionPlan::class, ['parentRecord' => $client])
+            ->fillForm([
+                'session_number' => 1,
+                'attachments' => [UploadedFile::fake()->create('notes.docx', 10, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')],
+            ])
+            ->call('create')
+            ->assertHasErrors();
+
+        $this->assertFalse($client->sessionPlans()->exists());
     }
 
     public function test_session_number_defaults_to_the_next_number(): void
