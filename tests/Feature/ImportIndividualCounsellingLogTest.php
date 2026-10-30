@@ -104,7 +104,9 @@ class ImportIndividualCounsellingLogTest extends TestCase
         $this->assertNull($log->signature);
         $this->assertCount(2, $log->logBookEntries);
         Storage::disk('local')->assertMissing($path);
-        Process::assertRan(fn ($process): bool => $process->command[0] === 'claude' && $process->path !== base_path());
+        Process::assertRan(fn ($process): bool => $process->command[0] === 'claude'
+            && in_array('sonnet', $process->command, true)
+            && $process->path !== base_path());
     }
 
     public function test_importing_the_same_session_again_updates_the_report(): void

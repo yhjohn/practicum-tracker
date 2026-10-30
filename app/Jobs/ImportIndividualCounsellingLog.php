@@ -65,7 +65,8 @@ class ImportIndividualCounsellingLog implements ShouldQueue
         try {
             $result = Process::path($directory)
                 ->timeout(80)
-                ->run(['claude', '-p', self::PROMPT, '--allowedTools', 'Read'])
+                // Sonnet over the container's default haiku: word-for-word fidelity matters more than quota here.
+                ->run(['claude', '-p', self::PROMPT, '--model', 'sonnet', '--allowedTools', 'Read'])
                 ->throw();
         } finally {
             File::deleteDirectory($directory);
