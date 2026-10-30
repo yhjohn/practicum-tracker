@@ -6,17 +6,25 @@ services:
       target: app
     container_name: practicum_app
     restart: unless-stopped
-    ports:
-      - "8087:8080"
     environment:
       DB_HOST: "mysql"
     volumes:
-      - /volume1/docker/practicum-tracker:/var/www/html
+      - /var/www/docker/sites/pt:/var/www/html
     depends_on:
       mysql:
         condition: service_healthy
+    labels:
+      - "traefik.docker.network=main_network"
+      - "traefik.enable=${ENABLE_TRAEFIK:-true}"
+      - "traefik.http.routers.${PREFIX:-practicum}.rule=${DOMAIN}"
+      - "traefik.http.routers.${PREFIX:-practicum}.entrypoints=websecure"
+      - "traefik.http.routers.${PREFIX:-practicum}.tls=true"
+      - "traefik.http.routers.${PREFIX:-practicum}.tls.certresolver=myresolver"
+      # ServerSideUp listens on port 8080 by default
+      - "traefik.http.services.${PREFIX:-practicum}.loadbalancer.server.port=8080"
     networks:
       - practicum_network
+      - main_network
 
   claude:
     build:
@@ -34,12 +42,12 @@ services:
     environment:
       DB_HOST: "mysql"
       PHP_FPM_POOL_NAME: "practicum_queue"
-      # Long-lived subscription token from `claude setup-token`. Set it in Portainer, never in the repo.
+      # Long-lived subscription token from `claude setup-token`. Set it in the .env next to this file, never in the repo.
       CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN}
       # Summaries are simple; haiku is fastest and lightest on subscription quota.
       ANTHROPIC_MODEL: "haiku"
     volumes:
-      - /volume1/docker/practicum-tracker:/var/www/html
+      - /var/www/docker/sites/pt:/var/www/html
     depends_on:
       mysql:
         condition: service_healthy
@@ -51,11 +59,11 @@ services:
     container_name: practicum_mysql
     restart: unless-stopped
     environment:
-      # Set your database values directly here or via Portainer Environment UI
       MYSQL_DATABASE: "laravel_db"
       MYSQL_USER: "laravel_user"
-      MYSQL_PASSWORD: "secret_password"
-      MYSQL_ROOT_PASSWORD: "secret_password"
+      # Set both in the .env next to this file. MySQL reads them only when it first creates mysql_data.
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -78,6 +86,8 @@ services:
 networks:
   practicum_network:
     driver: bridge
+  main_network:
+    external: true
 
 volumes:
   mysql_data:

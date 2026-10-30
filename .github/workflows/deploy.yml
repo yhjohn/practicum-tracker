@@ -1,0 +1,34 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # SSH_KNOWN_HOSTS is the output of `ssh-keyscan <host>`, so the VPS host key is pinned.
+      - run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # pipefail stops the deploy before migrating if the backup dump fails.
+      - run: |
+          ssh "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -seuo pipefail' <<'EOF'
+          # Write the dump through practicum_app so it lands in the bind-mounted app directory, wherever that is on the host.
+          docker exec practicum_mysql sh -c 'mysqldump --single-transaction -u root -p"$MYSQL_ROOT_PASSWORD" laravel_db' \
+            | docker exec -i practicum_app sh -c "cat > /var/www/html/mysql_$(TZ=UTC-8 date +%Y%m%d-%H%M%S).sql"
+
+          docker exec practicum_app sh -c '
+            git config --global --add safe.directory /var/www/html &&
+            git -C /var/www/html remote set-url origin https://github.com/yhjohn/practicum-tracker.git &&
+            git -C /var/www/html pull origin main
+          '
+          docker exec practicum_app composer install --no-interaction --prefer-dist --optimize-autoloader
+          docker exec practicum_app php artisan migrate --force
+          docker exec practicum_app php artisan optimize
+          EOF
