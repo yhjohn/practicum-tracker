@@ -31,4 +31,6 @@ jobs:
           docker exec practicum_app composer install --no-interaction --prefer-dist --optimize-autoloader
           docker exec practicum_app php artisan migrate --force
           docker exec practicum_app php artisan optimize
+          # The practicum_claude worker exits after its current job and Docker restarts it on the new code.
+          docker exec practicum_app php artisan queue:restart
           EOF
