@@ -55,6 +55,22 @@ class ViewClient extends ViewRecord
                         ->readOnly()
                         ->copyable(),
                 ]),
+            Action::make('openClientPortal')
+                ->label('Open client portal')
+                ->icon(Phosphor::ArrowSquareOut)
+                ->action(function (Client $record): void {
+                    $record->public_access_token = $record->public_access_token ?: (string) Str::uuid();
+
+                    if (! $record->public_access_expires_at || now()->gt($record->public_access_expires_at)) {
+                        $record->public_access_expires_at = now()->addDays(30);
+                    }
+
+                    $record->save();
+
+                    session()->put("client_portal.{$record->id}", now()->addDays(2));
+
+                    $this->redirect(URL::temporarySignedRoute('client.portal', $record->public_access_expires_at, ['token' => $record->public_access_token]));
+                }),
             Action::make('downloadConsentPdf')
                 ->label('Download consent PDF')
                 ->icon(Phosphor::FileArrowDown)
