@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\IndividualCounsellingLogs\IndividualCounsellingLogResource;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\CreateIndividualCounsellingLog;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\EditIndividualCounsellingLog;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\ViewIndividualCounsellingLog;
@@ -57,7 +58,8 @@ class IndividualCounsellingLogTest extends TestCase
                 'part1_subjective_objective' => 'Client presented with...',
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertRedirect(IndividualCounsellingLogResource::getUrl('view', ['record' => IndividualCounsellingLog::firstOrFail()]));
 
         $log = IndividualCounsellingLog::firstOrFail();
 
@@ -101,6 +103,18 @@ class IndividualCounsellingLogTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertNull(IndividualCounsellingLog::firstOrFail()->written_at);
+    }
+
+    public function test_saving_an_edit_returns_to_the_view_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
+
+        Livewire::test(EditIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
+            ->fillForm(['place' => 'Campus'])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(IndividualCounsellingLogResource::getUrl('view', ['record' => $log]));
     }
 
     public function test_editing_sets_written_at_when_the_session_start_is_added_and_changed(): void

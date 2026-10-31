@@ -96,7 +96,8 @@ class ImportIndividualCounsellingLog implements ShouldQueue
 
         IndividualCounsellingLog::updateOrCreate(
             ['client_id' => $this->client->id, 'session_number' => $sessionNumber === false ? null : $sessionNumber],
-            $attributes,
+            // Exported reports do not show the duration; sessions run for an hour.
+            [...$attributes, 'duration_hours' => 1],
         );
 
         Storage::disk('local')->delete($this->path);

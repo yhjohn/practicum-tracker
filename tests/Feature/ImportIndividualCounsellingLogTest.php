@@ -97,6 +97,7 @@ class ImportIndividualCounsellingLogTest extends TestCase
         $this->assertSame('09:00', $log->start_time->format('H:i'));
         $this->assertSame('2026-10-17 23:51:00', $log->written_at->toDateTimeString());
         $this->assertSame('Sunway Serene Residensi', $log->place);
+        $this->assertEquals(1, $log->duration_hours);
         $this->assertSame('<p>A14 attended counselling. A150 is someone else.</p>', $log->part1_subjective_objective);
         $this->assertSame('<h3>Incongruence</h3><p>A14’s values.</p>', $log->part2_assessment);
         $this->assertNull($log->part3_treatment_plan);
