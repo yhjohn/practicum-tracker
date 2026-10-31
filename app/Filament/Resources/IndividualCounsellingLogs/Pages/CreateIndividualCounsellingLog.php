@@ -11,4 +11,9 @@ class CreateIndividualCounsellingLog extends CreateRecord
     use HasAutosaveForCreate;
 
     protected static string $resource = IndividualCounsellingLogResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResourceUrl('view', ['record' => $this->getRecord()]);
+    }
 }
