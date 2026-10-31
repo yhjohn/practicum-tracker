@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * Turns an exported individual counselling report PDF back into a log by having
@@ -72,8 +73,12 @@ class ImportIndividualCounsellingLog implements ShouldQueue
             File::deleteDirectory($directory);
         }
 
-        /** @var array<string, mixed> $report */
-        $report = json_decode(trim(preg_replace('/^```(?:json)?|```$/m', '', $result->output())), true, flags: JSON_THROW_ON_ERROR);
+        // Claude sometimes wraps the JSON in prose or code fences, so take the outermost object.
+        $report = preg_match('/\{.*\}/s', $result->output(), $match) ? json_decode($match[0], true) : null;
+
+        if (! is_array($report)) {
+            throw new RuntimeException('Claude did not return the report as JSON: '.Str::limit(trim($result->output()), 500));
+        }
 
         $attributes = Arr::only($report, self::FIELDS);
         $oldCode = trim((string) ($report['client_code'] ?? ''));
