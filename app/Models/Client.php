@@ -156,6 +156,11 @@ class Client extends Model
         return $this->hasMany(SessionPlan::class);
     }
 
+    public function individualCounsellingLogs(): HasMany
+    {
+        return $this->hasMany(IndividualCounsellingLog::class);
+    }
+
     public function mse(): HasOne
     {
         return $this->hasOne(MentalStatusExamination::class);

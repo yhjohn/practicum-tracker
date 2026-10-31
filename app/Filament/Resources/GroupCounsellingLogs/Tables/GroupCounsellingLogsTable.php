@@ -2,18 +2,22 @@
 
 namespace App\Filament\Resources\GroupCounsellingLogs\Tables;
 
+use App\Models\GroupCounsellingLog;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class GroupCounsellingLogsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('group.counsellingLogs:id,group_id,session_number'))
             ->columns([
                 TextColumn::make('group.name')
                     ->label('Group')
@@ -29,6 +33,10 @@ class GroupCounsellingLogsTable
                     ->placeholder('-'),
                 TextColumn::make('session_theme')
                     ->placeholder('-'),
+                TextColumn::make('total_sessions')
+                    ->label('Total sessions')
+                    ->tooltip('Reports logged for this group, and their session numbers')
+                    ->state(fn (GroupCounsellingLog $record): string => self::totalSessions($record->group?->counsellingLogs)),
                 TextColumn::make('place')
                     ->placeholder('-'),
                 TextColumn::make('written_at')
@@ -57,5 +65,21 @@ class GroupCounsellingLogsTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Count of logged reports with their session numbers, e.g. "3 (1, 2, 4)", so gaps stand out.
+     *
+     * @param  Collection<int, GroupCounsellingLog>|null  $logs
+     */
+    private static function totalSessions(?Collection $logs): string
+    {
+        if ($logs === null || $logs->isEmpty()) {
+            return '-';
+        }
+
+        $numbers = $logs->pluck('session_number')->filter()->unique()->sort()->implode(', ');
+
+        return $numbers === '' ? (string) $logs->count() : "{$logs->count()} ({$numbers})";
     }
 }
