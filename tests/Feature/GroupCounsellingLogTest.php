@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\GroupCounsellingLogs\Pages\CreateGroupCounsellingLog;
 use App\Filament\Resources\GroupCounsellingLogs\Pages\EditGroupCounsellingLog;
+use App\Filament\Resources\GroupCounsellingLogs\Pages\ListGroupCounsellingLogs;
 use App\Filament\Resources\GroupCounsellingLogs\Pages\ViewGroupCounsellingLog;
 use App\Filament\Widgets\ClientStatsOverview;
 use App\Models\Client;
@@ -183,5 +184,15 @@ class GroupCounsellingLogTest extends TestCase
             ->assertSee('Group counselling hours')
             ->assertSee('3.5 / 30')
             ->assertSee('26.5 h to go');
+    }
+
+    public function test_table_shows_each_groups_total_sessions_and_their_numbers(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $group = Group::factory()->create();
+        $logs = collect([3, 1])->map(fn (int $number) => GroupCounsellingLog::factory()->create(['group_id' => $group->id, 'session_number' => $number]));
+
+        Livewire::test(ListGroupCounsellingLogs::class)
+            ->assertTableColumnStateSet('total_sessions', '2 (1, 3)', $logs->first());
     }
 }

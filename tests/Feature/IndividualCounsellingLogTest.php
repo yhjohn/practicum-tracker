@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\CreateIndividualCounsellingLog;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\EditIndividualCounsellingLog;
+use App\Filament\Resources\IndividualCounsellingLogs\Pages\ListIndividualCounsellingLogs;
 use App\Filament\Resources\IndividualCounsellingLogs\Pages\ViewIndividualCounsellingLog;
 use App\Models\Client;
 use App\Models\IndividualCounsellingLog;
@@ -317,5 +318,17 @@ class IndividualCounsellingLogTest extends TestCase
         @mkdir(dirname($path), recursive: true);
 
         IOFactory::createWriter($phpWord, 'Word2007')->save($path);
+    }
+
+    public function test_table_shows_each_clients_total_sessions_and_their_numbers(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $logs = collect([4, 1, 2])->map(fn (int $number) => IndividualCounsellingLog::create(['client_id' => $client->id, 'session_number' => $number]));
+        $other = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id, 'session_number' => null]);
+
+        Livewire::test(ListIndividualCounsellingLogs::class)
+            ->assertTableColumnStateSet('total_sessions', '3 (1, 2, 4)', $logs->first())
+            ->assertTableColumnStateSet('total_sessions', '1', $other);
     }
 }
