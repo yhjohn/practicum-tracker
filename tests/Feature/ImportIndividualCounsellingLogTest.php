@@ -23,7 +23,7 @@ class ImportIndividualCounsellingLogTest extends TestCase
     /**
      * @param  array<string, mixed>  $overrides
      */
-    private function fakeTranscription(array $overrides = []): void
+    private function fakeTranscription(array $overrides = [], string $wrapper = "```json\n%s\n```"): void
     {
         $report = array_merge([
             'client_code' => 'A15',
@@ -39,7 +39,7 @@ class ImportIndividualCounsellingLogTest extends TestCase
             'signature' => 'not a column Claude may set',
         ], $overrides);
 
-        Process::fake(['*' => Process::result("```json\n".json_encode($report)."\n```")]);
+        Process::fake(['*' => Process::result(sprintf($wrapper, json_encode($report)))]);
     }
 
     private function storeUpload(): string
@@ -129,10 +129,21 @@ class ImportIndividualCounsellingLogTest extends TestCase
         try {
             (new ImportIndividualCounsellingLog($path, Client::factory()->create()))->handle();
             $this->fail('Expected the import to fail.');
-        } catch (\JsonException) {
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Sorry, I could not read that file.', $exception->getMessage());
         }
 
         $this->assertDatabaseCount('individual_counselling_logs', 0);
         Storage::disk('local')->assertExists($path);
+    }
+
+    public function test_it_finds_the_json_when_claude_adds_prose_around_it(): void
+    {
+        $this->fakeTranscription(wrapper: "Here is the report as JSON:\n\n%s\n\nLet me know if you need anything else.");
+        $client = Client::factory()->create(['client_code' => 'A14']);
+
+        (new ImportIndividualCounsellingLog($this->storeUpload(), $client))->handle();
+
+        $this->assertSame('<p>Rapport with A14 developed.</p>', IndividualCounsellingLog::sole()->part4_evaluation);
     }
 }
