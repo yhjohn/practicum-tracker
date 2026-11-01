@@ -17,32 +17,11 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
 use Tests\TestCase;
 
 class IndividualCounsellingLogTest extends TestCase
 {
     use RefreshDatabase;
-
-    private bool $touchedTemplate = false;
-
-    private ?string $originalTemplate = null;
-
-    protected function tearDown(): void
-    {
-        if ($this->touchedTemplate) {
-            $path = resource_path('templates/individual-counselling-log.docx');
-
-            if ($this->originalTemplate !== null) {
-                file_put_contents($path, $this->originalTemplate);
-            } else {
-                @unlink($path);
-            }
-        }
-
-        parent::tearDown();
-    }
 
     public function test_creating_a_log_saves_the_session_details(): void
     {
@@ -192,8 +171,10 @@ class IndividualCounsellingLogTest extends TestCase
         $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
 
         Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
-            ->assertActionVisible('downloadPdf')
-            ->callAction('downloadPdf')
+            ->assertActionHidden('downloadPdf')
+            ->assertActionHidden('downloadDocx')
+            ->assertActionVisible('downloadPdfV2')
+            ->callAction('downloadPdfV2')
             ->assertHasNoActionErrors();
     }
 
@@ -204,34 +185,6 @@ class IndividualCounsellingLogTest extends TestCase
         $pdf = Pdf::loadView('pdf.individual-counselling-log', ['log' => $log])->output();
 
         $this->assertStringStartsWith('%PDF', $pdf);
-    }
-
-    public function test_download_docx_action_notifies_when_template_is_missing(): void
-    {
-        $this->hideTemplate();
-
-        $this->actingAs(User::factory()->create());
-        $log = IndividualCounsellingLog::create(['client_id' => Client::factory()->create()->id]);
-
-        Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
-            ->callAction('downloadDocx')
-            ->assertNotified('DOCX template missing');
-    }
-
-    public function test_download_docx_action_fills_the_template_once_it_exists(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $client = Client::factory()->create(['name' => 'Jane Client']);
-        $log = IndividualCounsellingLog::create([
-            'client_id' => $client->id,
-            'part1_subjective_objective' => '<p>First paragraph.</p><p>Second paragraph.</p>',
-        ]);
-
-        $this->writeFixtureTemplate();
-
-        Livewire::test(ViewIndividualCounsellingLog::class, ['record' => $log->getRouteKey()])
-            ->callAction('downloadDocx')
-            ->assertHasNoActionErrors();
     }
 
     public function test_docx_keeps_bold_breaks_headings_and_lists(): void
@@ -300,38 +253,6 @@ class IndividualCounsellingLogTest extends TestCase
         $html = view('pdf.individual-counselling-log', ['log' => $log])->render();
 
         $this->assertStringContainsString('Jane Client (J01)', $html);
-    }
-
-    private function hideTemplate(): void
-    {
-        $this->touchedTemplate = true;
-
-        $path = resource_path('templates/individual-counselling-log.docx');
-
-        if (is_file($path)) {
-            $this->originalTemplate = file_get_contents($path);
-            unlink($path);
-        }
-    }
-
-    private function writeFixtureTemplate(): void
-    {
-        $this->touchedTemplate = true;
-
-        $path = resource_path('templates/individual-counselling-log.docx');
-
-        if (is_file($path) && $this->originalTemplate === null) {
-            $this->originalTemplate = file_get_contents($path);
-        }
-
-        $phpWord = new PhpWord;
-        $phpWord->addSection()->addText(
-            '${client_name} ${session_date} ${session_number} ${time} ${duration} ${place} ${part1} ${part2} ${part3} ${part4}'
-        );
-
-        @mkdir(dirname($path), recursive: true);
-
-        IOFactory::createWriter($phpWord, 'Word2007')->save($path);
     }
 
     public function test_table_shows_each_clients_total_sessions_and_their_numbers(): void

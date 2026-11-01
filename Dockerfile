@@ -16,7 +16,8 @@ USER www-data
 FROM app AS claude
 
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
+# poppler-utils gives the CLI pdftoppm, which its Read tool needs for PDFs (see App\Jobs\ImportIndividualCounsellingLog)
+RUN apt-get update && apt-get install -y --no-install-recommends curl poppler-utils && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /opt/claude-home && chown www-data:www-data /opt/claude-home
 
 USER www-data
