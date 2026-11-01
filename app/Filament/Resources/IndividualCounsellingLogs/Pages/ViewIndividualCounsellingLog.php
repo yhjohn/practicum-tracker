@@ -29,10 +29,12 @@ class ViewIndividualCounsellingLog extends ViewRecord
             Action::make('downloadPdf')
                 ->label('v1 PDF')
                 ->icon(Phosphor::FileArrowDown)
+                ->hidden()
                 ->action(fn (IndividualCounsellingLog $record) => static::downloadPdf($record)),
             Action::make('downloadDocx')
                 ->label('v1 DOCX')
                 ->icon(Phosphor::FileArrowDown)
+                ->hidden()
                 ->action(fn (IndividualCounsellingLog $record) => static::downloadDocx($record)),
             Action::make('downloadPdfV2')
                 ->label('v2 PDF')
