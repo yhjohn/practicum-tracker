@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Clients;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Clients\Pages\ManageClientProgressJourneys;
 use App\Filament\Resources\Clients\Pages\ManageClientSessionPlans;
 use App\Filament\Resources\Clients\Pages\ViewClient;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
@@ -57,6 +58,7 @@ class ClientResource extends Resource
             'view' => ViewClient::route('/{record}'),
             'edit' => EditClient::route('/{record}/edit'),
             'session-plans' => ManageClientSessionPlans::route('/{record}/session-plans'),
+            'progress-journeys' => ManageClientProgressJourneys::route('/{record}/progress-journeys'),
         ];
     }
 }

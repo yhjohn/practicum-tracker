@@ -53,6 +53,10 @@ class ClientsTable
                     ->label('Session plans')
                     ->icon(Phosphor::Notepad)
                     ->url(fn (Client $record): string => ClientResource::getUrl('session-plans', ['record' => $record])),
+                Action::make('progressJourneys')
+                    ->label('Progress journey')
+                    ->icon(Phosphor::Path)
+                    ->url(fn (Client $record): string => ClientResource::getUrl('progress-journeys', ['record' => $record])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
