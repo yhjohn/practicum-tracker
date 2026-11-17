@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Jobs\DraftProgressJourney;
 use App\Models\Concerns\HasLogBookEntry;
 use App\Models\Concerns\HasPracticumWeek;
 use App\Models\Concerns\HasReportSummary;
 use App\Models\Concerns\HasWrittenAt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class IndividualCounsellingLog extends Model
 {
@@ -25,9 +27,25 @@ class IndividualCounsellingLog extends Model
         'attachments' => 'array',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(fn (self $log) => DraftProgressJourney::dispatch($log));
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function progressJourney(): HasOne
+    {
+        return $this->hasOne(ProgressJourney::class);
+    }
+
+    public function hasReportContent(): bool
+    {
+        return collect([$this->part1_subjective_objective, $this->part2_assessment, $this->part3_treatment_plan, $this->part4_evaluation])
+            ->contains(fn (?string $html): bool => trim(strip_tags((string) $html)) !== '');
     }
 
     public function summaryText(): string
