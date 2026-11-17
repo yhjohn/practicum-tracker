@@ -53,7 +53,11 @@ class ReportSummaryTest extends TestCase
 
     public function test_saving_again_overwrites_the_single_summary(): void
     {
-        Process::fake(['*' => Process::sequence()->push(Process::result('First.'))->push(Process::result('Second.'))]);
+        // Saving also drafts a progress journey, so only hand the sequence to summary runs.
+        $summaries = ['First.', 'Second.'];
+        Process::fake(function (PendingProcess $process) use (&$summaries) {
+            return Process::result(in_array(SummarizeReport::PROMPT, $process->command, true) ? array_shift($summaries) : '');
+        });
 
         $log = $this->makeLog();
         $log->update(['part4_evaluation' => '<p>Improved.</p>']);
