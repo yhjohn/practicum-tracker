@@ -98,4 +98,45 @@ class ClientPdfDownloadTest extends TestCase
         $this->assertStringContainsString($intake->signature, $html);
         $this->assertStringStartsWith('%PDF', Pdf::loadView('pdf.intake-v2', ['intake' => $intake])->output());
     }
+
+    public function test_intake_pdfs_fall_back_to_the_consent_signature_when_the_intake_is_unsigned(): void
+    {
+        $client = Client::factory()->create();
+        $consent = Consent::factory()->for($client)->submitted()->create([
+            'signature' => 'data:image/png;base64,consent-signature',
+            'signature_date' => '2026-09-16',
+        ]);
+
+        foreach ([
+            'pdf.intake' => Intake::factory()->for($client)->submitted()->create(['signature' => null]),
+            'pdf.intake-v2' => IntakeV2::factory()->for($client)->submitted()->create(['signature' => null]),
+        ] as $view => $intake) {
+            $html = view($view, ['intake' => $intake])->render();
+
+            $this->assertStringContainsString($consent->signature, $html);
+            $this->assertStringContainsString('Signature taken from consent form signed 16 Sep 2026', $html);
+        }
+    }
+
+    public function test_intake_pdf_prefers_its_own_signature_over_the_consent_signature(): void
+    {
+        $client = Client::factory()->create();
+        Consent::factory()->for($client)->submitted()->create(['signature' => 'data:image/png;base64,consent-signature']);
+        $intake = IntakeV2::factory()->for($client)->submitted()->create();
+
+        $html = view('pdf.intake-v2', ['intake' => $intake])->render();
+
+        $this->assertStringContainsString($intake->signature, $html);
+        $this->assertStringNotContainsString('consent-signature', $html);
+        $this->assertStringNotContainsString('Signature taken from consent form', $html);
+    }
+
+    public function test_intake_pdf_shows_not_signed_without_any_signature(): void
+    {
+        $intake = IntakeV2::factory()->submitted()->create(['signature' => null]);
+
+        $html = view('pdf.intake-v2', ['intake' => $intake])->render();
+
+        $this->assertStringContainsString('Not signed', $html);
+    }
 }
