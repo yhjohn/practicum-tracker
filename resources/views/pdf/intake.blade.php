@@ -132,13 +132,7 @@
         <tr>
             <td class="label">Signature</td>
             <td>
-                <div class="signature-box">
-                    @if ($intake->signature)
-                        <img src="{{ $intake->signature }}" alt="Signature">
-                    @else
-                        Not signed
-                    @endif
-                </div>
+                @include('pdf.intake-signature')
             </td>
         </tr>
     </table>

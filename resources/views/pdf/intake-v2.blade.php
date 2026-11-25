@@ -96,13 +96,7 @@
         <tr>
             <td class="label">Signature</td>
             <td>
-                <div class="signature-box">
-                    @if ($intake->signature)
-                        <img src="{{ $intake->signature }}" alt="Signature">
-                    @else
-                        Not signed
-                    @endif
-                </div>
+                @include('pdf.intake-signature')
             </td>
         </tr>
         <tr><td class="label">Date signed</td><td>{{ optional($intake->signature_date)->format('d M Y') ?? '—' }}</td></tr>
